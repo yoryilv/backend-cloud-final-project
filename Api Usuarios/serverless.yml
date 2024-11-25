@@ -1,0 +1,23 @@
+org: jorgeleandro
+service: api-usuarios
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::606646193182:role/LabRole
+  environment:
+    TABLE_NAME_USUARIOS: ${sls:stage}-t_usuarios
+
+functions:
+  CrearUsuario:
+    handler: CrearUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuario/crear
+          method: post
+          cors: true
+          integration: lambda
+

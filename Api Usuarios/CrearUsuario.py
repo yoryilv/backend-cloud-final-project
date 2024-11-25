@@ -23,7 +23,7 @@ def lambda_handler(event, context):
             if role not in valid_roles:
                 return {
                 'statusCode': 400,
-                'body': json.dumps({'error': 'Invalid role. Role must be either "client" or "admin"'})
+                'body': json.dumps({'error': 'Rol Invalido. Debe ser "client" o "admin"'})
                 }
             
             # Hashea la contraseña antes de almacenarla
