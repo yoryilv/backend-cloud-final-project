@@ -174,7 +174,7 @@ functions:
           integration: lambda
 
   #api-compras (Node.js)
-    GetHistorialCompra:
+  GetHistorialCompra:
       handler: api-compras/GetHistorialCompra.getHistorialCompra
       events:
         - http:
@@ -184,75 +184,75 @@ functions:
             integration: lambda
 
     # Función para consultar detalles de una compra específica
-    GetCompraEspecifica:
-      handler: api-compras/GetCompraEspecifica.getCompraEspecifica
-      events:
-        - http:
-            path: /compras/detalle
-            method: get
-            cors: true
-            integration: lambda
+  GetCompraEspecifica:
+    handler: api-compras/GetCompraEspecifica.getCompraEspecifica
+    events:
+      - http:
+          path: /compras/detalle
+          method: get
+          cors: true
+          integration: lambda
 
     # Función para filtrar compras por fecha
-    CompraFecha:
-      handler: api-compras/CompraFecha.compraFecha
-      events:
-        - http:
-            path: /compras/filtrar
-            method: get
-            cors: true
-            integration: lambda
+  CompraFecha:
+    handler: api-compras/CompraFecha.compraFecha
+    events:
+      - http:
+          path: /compras/filtrar
+          method: get
+          cors: true
+          integration: lambda
 
     # Función para descargar recibo de compra
-    DescargarCompra:
-      handler: api-compras/DescargarCompra.descargarReciboCompra
-      events:
-        - http:
-            path: /compras/recibo
-            method: get
-            cors: true
-            integration: lambda
+  DescargarCompra:
+    handler: api-compras/DescargarCompra.descargarReciboCompra
+    events:
+      - http:
+          path: /compras/recibo
+          method: get
+          cors: true
+          integration: lambda
 
   # api-cine (Python)
-    AddCine:
-      handler: api-cine/AddCine.lambda_handler
-      runtime: python3.12
-      events:
-        - http:
-            path: /cine/agregar
-            method: post
-            cors: true
-            integration: lambda
+  AddCine:
+    handler: api-cine/AddCine.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/agregar
+          method: post
+          cors: true
+          integration: lambda
 
-    DeleteCine:
-      handler: api-cine/DeleteCine.lambda_handler
-      runtime: python3.12
-      events:
-        - http:
-            path: /cine/eliminar
-            method: delete
-            cors: true
-            integration: lambda
+  DeleteCine:
+    handler: api-cine/DeleteCine.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/eliminar
+          method: delete
+          cors: true
+          integration: lambda
 
-    GetCineDetails:
-      handler: api-cine/GetCineDetails.lambda_handler
-      runtime: python3.12
-      events:
-        - http:
-            path: /cine/consultar
-            method: get
-            cors: true
-            integration: lambda
+  GetCineDetails:
+    handler: api-cine/GetCineDetails.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/consultar
+          method: get
+          cors: true
+          integration: lambda
 
-    ListAllCines:
-      handler: api-cine/ListAllCines.lambda_handler
-      runtime: python3.12
-      events:
-        - http:
-            path: /cine/listar
-            method: get
-            cors: true
-            integration: lambda
+  ListAllCines:
+    handler: api-cine/ListAllCines.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/listar
+          method: get
+          cors: true
+          integration: lambda
 
 resources:
   Resources:
