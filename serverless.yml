@@ -2,7 +2,7 @@ service: backend-cine
 
 provider:
   name: aws
-  runtime: nodejs14.x  # Cambia esto si deseas que sea global para todos los microservicios
+  runtime: nodejs14.x
   memorySize: 1024
   timeout: 30
   region: us-east-1
@@ -173,7 +173,7 @@ functions:
           integration: lambda
 
   #api-compras (Node.js)
-  GetHistorialCompra:
+    GetHistorialCompra:
       handler: api-compras/GetHistorialCompra.getHistorialCompra
       events:
         - http:
@@ -213,45 +213,45 @@ functions:
             integration: lambda
 
   # api-cine (Python)
-  AddCine:
-    handler: api-cine/AddCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/agregar
-          method: post
-          cors: true
-          integration: lambda
+    AddCine:
+      handler: api-cine/AddCine.lambda_handler
+      runtime: python3.12
+      events:
+        - http:
+            path: /cine/agregar
+            method: post
+            cors: true
+            integration: lambda
 
-  DeleteCine:
-    handler: api-cine/DeleteCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/eliminar
-          method: delete
-          cors: true
-          integration: lambda
+    DeleteCine:
+      handler: api-cine/DeleteCine.lambda_handler
+      runtime: python3.12
+      events:
+        - http:
+            path: /cine/eliminar
+            method: delete
+            cors: true
+            integration: lambda
 
-  GetCineDetails:
-    handler: api-cine/GetCineDetails.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/consultar
-          method: get
-          cors: true
-          integration: lambda
+    GetCineDetails:
+      handler: api-cine/GetCineDetails.lambda_handler
+      runtime: python3.12
+      events:
+        - http:
+            path: /cine/consultar
+            method: get
+            cors: true
+            integration: lambda
 
-  ListAllCines:
-    handler: api-cine/ListAllCines.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/listar
-          method: get
-          cors: true
-          integration: lambda
+    ListAllCines:
+      handler: api-cine/ListAllCines.lambda_handler
+      runtime: python3.12
+      events:
+        - http:
+            path: /cine/listar
+            method: get
+            cors: true
+            integration: lambda
 
 resources:
   Resources:
