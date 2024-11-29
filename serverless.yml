@@ -6,7 +6,7 @@ provider:
   runtime: nodejs14.x
   memorySize: 1024
   timeout: 30
-  region: us-east-1
+  region: us-east-1c
   iam:
     role: arn:aws:iam::606646193182:role/LabRole
   environment:
