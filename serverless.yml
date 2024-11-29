@@ -1,0 +1,363 @@
+service: backend-cine
+
+provider:
+  name: aws
+  runtime: nodejs14.x  # Cambia esto si deseas que sea global para todos los microservicios
+  memorySize: 1024
+  timeout: 30
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::606646193182:role/LabRole
+  environment:
+    TABLE_NAME_USUARIOS: ${sls:stage}-t_usuarios
+    TABLE_NAME_CINES: ${sls:stage}-t_cines
+    TABLE_NAME_CARTELERA: ${sls:stage}-t_cartelera
+    TABLE_NAME_PELICULAS: ${sls:stage}-t_peliculas
+    TABLE_NAME_FUNCIONES: ${sls:stage}-t_funciones
+    TABLE_NAME_PROYECCIONES: ${sls:stage}-t_proyecciones
+    TABLE_NAME_COMPRAS: ${sls:stage}-t_compras
+
+functions:
+  # api-usuarios (Python)
+  CrearUsuario:
+    handler: api-usuarios/CrearUsuario.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /usuario/crear
+          method: post
+          cors: true
+          integration: lambda
+
+  LoginUsuario:
+    handler: api-usuarios/LoginUsuario.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /usuario/login
+          method: post
+          cors: true
+          integration: lambda
+
+  ValidarToken:
+    handler: api-usuarios/ValidarToken.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /usuario/validar
+          method: post
+          cors: true
+          integration: lambda
+
+  # api-peliculas (Node.js)
+  AddMovie:
+    handler: api-peliculas/Addmovie.addMovie
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/agregar
+          method: post
+          cors: true
+          integration: lambda
+
+  UpdateMovie:
+    handler: api-peliculas/Updatemovie.updateMovie
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/actualizar
+          method: put
+          cors: true
+          integration: lambda
+
+  DeleteMovie:
+    handler: api-peliculas/Deletemovie.deleteMovie
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/eliminar
+          method: delete
+          cors: true
+          integration: lambda
+
+  # api-reserva (Node.js)
+  ListarPeliculas:
+    handler: api-reserva/ListarPeliculas.listarPeliculas
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/listar
+          method: get
+          cors: true
+          integration: lambda
+
+  RequestCinePerMovie:
+    handler: api-reserva/RequestCinePerMovie.consultarCinesPorPelicula
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/cines
+          method: get
+          cors: true
+          integration: lambda
+
+  consultarHorariosPorCineYPelicula:
+    handler: api-reserva/consultarHorariosPorCineYPelicula.consultarHorariosPorCineYPelicula
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/horarios
+          method: get
+          cors: true
+          integration: lambda
+
+  SeatsAvailable:
+    handler: api-reserva/SeatsAvailable.consultarDisponibilidadDeAsientos
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/asientos
+          method: get
+          cors: true
+          integration: lambda
+
+  ReserveSeats:
+    handler: api-reserva/ReserveSeats.reservarAsientos
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/reservar
+          method: post
+          cors: true
+          integration: lambda
+
+  CancelSeats:
+    handler: api-reserva/CancelSeats.cancelarReservaDeAsientos
+    runtime: nodejs14.x
+    events:
+      - http:
+          path: /pelicula/cancelar
+          method: post
+          cors: true
+          integration: lambda
+
+  # api-proyecciones (Python)
+  AddProyection:
+    handler: api-proyecciones/AddProyection.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /proyection/agregar
+          method: post
+          cors: true
+          integration: lambda
+
+  UpdateProyection:
+    handler: api-proyecciones/UpdateProyection.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /proyection/actualizar
+          method: put
+          cors: true
+          integration: lambda
+
+  DeleteProyection:
+    handler: api-proyecciones/DeleteProyection.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /proyection/eliminar
+          method: delete
+          cors: true
+          integration: lambda
+
+  #api-compras (Node.js)
+  GetHistorialCompra:
+      handler: api-compras/GetHistorialCompra.getHistorialCompra
+      events:
+        - http:
+            path: /compras/historial
+            method: get
+            cors: true
+            integration: lambda
+
+    # Función para consultar detalles de una compra específica
+    GetCompraEspecifica:
+      handler: api-compras/GetCompraEspecifica.getCompraEspecifica
+      events:
+        - http:
+            path: /compras/detalle
+            method: get
+            cors: true
+            integration: lambda
+
+    # Función para filtrar compras por fecha
+    CompraFecha:
+      handler: api-compras/CompraFecha.compraFecha
+      events:
+        - http:
+            path: /compras/filtrar
+            method: get
+            cors: true
+            integration: lambda
+
+    # Función para descargar recibo de compra
+    DescargarCompra:
+      handler: api-compras/DescargarCompra.descargarReciboCompra
+      events:
+        - http:
+            path: /compras/recibo
+            method: get
+            cors: true
+            integration: lambda
+
+  # api-cine (Python)
+  AddCine:
+    handler: api-cine/AddCine.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/agregar
+          method: post
+          cors: true
+          integration: lambda
+
+  DeleteCine:
+    handler: api-cine/DeleteCine.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/eliminar
+          method: delete
+          cors: true
+          integration: lambda
+
+  GetCineDetails:
+    handler: api-cine/GetCineDetails.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/consultar
+          method: get
+          cors: true
+          integration: lambda
+
+  ListAllCines:
+    handler: api-cine/ListAllCines.lambda_handler
+    runtime: python3.12
+    events:
+      - http:
+          path: /cine/listar
+          method: get
+          cors: true
+          integration: lambda
+
+resources:
+  Resources:
+    # Tabla de Usuarios
+    UsuariosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_USUARIOS}
+        AttributeDefinitions:
+          - AttributeName: "user_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "user_id"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Cines
+    CinesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_CINES}
+        AttributeDefinitions:
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
+          - AttributeName: "district"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "cinema_id"
+            KeyType: "HASH"
+          - AttributeName: "district"
+            KeyType: "RANGE"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Cartelera
+    CarteleraTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_CARTELERA}
+        AttributeDefinitions:
+          - AttributeName: "movie_id"
+            AttributeType: "S"
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "movie_id"
+            KeyType: "HASH"
+          - AttributeName: "cinema_id"
+            KeyType: "RANGE"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Películas
+    PeliculasTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_PELICULAS}
+        AttributeDefinitions:
+          - AttributeName: "movie_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "movie_id"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Funciones
+    FuncionesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_FUNCIONES}
+        AttributeDefinitions:
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
+          - AttributeName: "show_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "cinema_id"
+            KeyType: "HASH"
+          - AttributeName: "show_id"
+            KeyType: "RANGE"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Proyecciones
+    ProyeccionesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_PROYECCIONES}
+        AttributeDefinitions:
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
+          - AttributeName: "show_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "cinema_id"
+            KeyType: "HASH"
+          - AttributeName: "show_id"
+            KeyType: "RANGE"
+        BillingMode: PAY_PER_REQUEST
+      
+      # Tabla de Compras
+      ComprasTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: ${self:provider.environment.TABLE_NAME_COMPRAS}
+          AttributeDefinitions:
+            - AttributeName: "compra_id"
+              AttributeType: "S"
+          KeySchema:
+            - AttributeName: "compra_id"
+              KeyType: "HASH"
+          BillingMode: PAY_PER_REQUEST
