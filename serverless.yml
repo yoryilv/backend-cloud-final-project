@@ -448,44 +448,40 @@ resources:
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
     
-    # API 1: API para usuarios
+    resources:
+  Resources:
     UsuarioApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: UsuarioApi
+        Name: ${self:provider.stage}-UsuarioApi  
         Description: API para la gestión de usuarios
 
-    # API 2: API para películas
     PeliculasApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: PeliculasApi
+        Name: ${self:provider.stage}-PeliculasApi  
         Description: API para gestión de películas
     
-    # API 3: API para reservas 
     ReservaApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: ReservaApi
+        Name: ${self:provider.stage}-ReservaApi  
         Description: API para gestión de reservas
     
-    # API 4: API para proyecciones
     ProyeccionesApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: ProyeccionesApi
+        Name: ${self:provider.stage}-ProyeccionesApi  
         Description: API para gestión de proyecciones
 
-    # API 5: API para compras
     ComprasApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: ComprasApi
+        Name: ${self:provider.stage}-ComprasApi  
         Description: API para gestión de compras
     
-    # API 6: API para cines
     CinesApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: CinesApi
+        Name: ${self:provider.stage}-CinesApi  
         Description: API para gestión de cines
