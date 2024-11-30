@@ -1,27 +1,45 @@
 const AWS = require('aws-sdk');
 const PDFDocument = require('pdfkit');
 const s3 = new AWS.S3();
+const dynamodb = new AWS.DynamoDB.DocumentClient(); // Cliente de DynamoDB
 
 exports.descargarRecibo = async (event) => {
     try {
-        const { user_id, purchase_id } = JSON.parse(event.body);
+        const { user_id, compra_id } = JSON.parse(event.body);
 
-        if (!user_id || !purchase_id) {
+        if (!user_id || !compra_id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'El user_id y purchase_id son obligatorios.' }),
+                body: JSON.stringify({ error: 'El user_id y compra_id son obligatorios.' }),
             };
         }
 
-        // Simular datos del recibo
+        // Obtener los datos del recibo desde DynamoDB usando el compra_id
+        const params = {
+            TableName: process.env.TABLE_NAME_COMPRAS,  // Nombre de la tabla de compras de DynamoDB
+            Key: {
+                'compra_id': compra_id,  // La clave primaria de la tabla es compra_id
+            },
+        };
+
+        const data = await dynamodb.get(params).promise();
+
+        if (!data.Item) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: 'Compra no encontrada' }),
+            };
+        }
+
+        // Datos obtenidos de la base de datos
         const receiptData = {
             user_id,
-            purchase_id,
-            cinema: "Cinepolis San Miguel",
-            movie: "Inception",
-            showtime: "2024-12-01 18:30",
-            seats: ["A1", "A2"],
-            total: 30.0,
+            compra_id,
+            cinema: data.Item.cinema,
+            movie: data.Item.movie,
+            showtime: data.Item.showtime,
+            seats: data.Item.seats,
+            total: data.Item.total,
         };
 
         const doc = new PDFDocument();
@@ -33,7 +51,7 @@ exports.descargarRecibo = async (event) => {
             const uploadResponse = await s3
                 .putObject({
                     Bucket: process.env.S3_BUCKET_NAME,
-                    Key: `receipts/${purchase_id}.pdf`,
+                    Key: `receipts/${compra_id}.pdf`,
                     Body: pdfBuffer,
                     ContentType: 'application/pdf',
                 })
@@ -43,7 +61,7 @@ exports.descargarRecibo = async (event) => {
                 statusCode: 200,
                 body: JSON.stringify({
                     message: 'Recibo generado exitosamente',
-                    url: `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/receipts/${purchase_id}.pdf`,
+                    url: `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/receipts/${compra_id}.pdf`,
                 }),
             };
         });
@@ -52,7 +70,7 @@ exports.descargarRecibo = async (event) => {
         doc.fontSize(18).text("Recibo de Compra", { align: "center" });
         doc.moveDown();
         doc.fontSize(12).text(`Usuario: ${receiptData.user_id}`);
-        doc.text(`Compra ID: ${receiptData.purchase_id}`);
+        doc.text(`Compra ID: ${receiptData.compra_id}`);
         doc.text(`Cine: ${receiptData.cinema}`);
         doc.text(`Película: ${receiptData.movie}`);
         doc.text(`Horario: ${receiptData.showtime}`);
