@@ -4,8 +4,9 @@ service: backend-cine
 provider:
   name: aws
   runtime: nodejs22.x
+  stage: ${opt:stage, 'dev'}
   memorySize: 1024
-  timeout: 30
+  timeout: 45
   region: us-east-1
   iam:
     role: arn:aws:iam::880764721962:role/LabRole
