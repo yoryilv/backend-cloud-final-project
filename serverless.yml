@@ -17,6 +17,7 @@ provider:
     TABLE_NAME_FUNCIONES: ${sls:stage}-t_funciones
     TABLE_NAME_PROYECCIONES: ${sls:stage}-t_proyecciones
     TABLE_NAME_COMPRAS: ${sls:stage}-t_compras
+    TABLE_NAME_TOKEN_ACCESO: ${sls:stage}-t_token_acceso
 
 functions:
   # api-usuarios (Python)
@@ -360,5 +361,18 @@ resources:
             AttributeType: "S"
         KeySchema:
           - AttributeName: "compra_id"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Token de Acceso
+    TokenAccesoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_TOKEN_ACCESO}
+        AttributeDefinitions:
+          - AttributeName: "token"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "token"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST

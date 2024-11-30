@@ -4,8 +4,8 @@ import json
 def lambda_handler(event, context):
     # Conectar con DynamoDB
     dynamodb = boto3.resource('dynamodb')
-    t_proyecciones = dynamodb.Table('t_proyecciones')
-    t_usuarios = dynamodb.Table('t_usuarios')
+    t_proyecciones = dynamodb.Table('${sls:stage}-t_proyecciones')  # Nombre dinámico de la tabla de proyecciones
+    t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')  # Nombre dinámico de la tabla de usuarios
 
     # Verificar user_id y permisos
     user_id = event.get('user_id')

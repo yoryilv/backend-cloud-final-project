@@ -3,8 +3,8 @@ import json
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
-    t_cines = dynamodb.Table('t_cines')
-    t_usuarios = dynamodb.Table('t_usuarios')
+    t_cines = dynamodb.Table('${sls:stage}-t_cines')
+    t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')
     
     # Obtener user_id
     user_id = event.get('user_id')
@@ -14,7 +14,6 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': 'user_id is required'})
         }
     
-
     user_response = t_usuarios.get_item(Key={'user_id': user_id})
     if 'Item' not in user_response or 'role' not in user_response['Item']:
         return {

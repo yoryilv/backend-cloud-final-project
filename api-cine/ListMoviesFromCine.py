@@ -14,7 +14,7 @@ def lambda_handler(event, context):
 
         # Conectar con DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        t_cartelera = dynamodb.Table('t_cartelera')  # Nombre de la tabla de cartelera en DynamoDB
+        t_cartelera = dynamodb.Table('${sls:stage}-t_cartelera')  # Nombre dinámico de la tabla
 
         # Consultar todas las películas de la cartelera para el cine específico
         response = t_cartelera.query(

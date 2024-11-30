@@ -5,7 +5,7 @@ def lambda_handler(event, context):
     try:
         # Conectar con DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        t_cines = dynamodb.Table('t_cines')  # Nombre de tabla de cines en DynamoDB
+        t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Nombre dinámico de la tabla
 
         # Escanear la tabla para obtener todos los cines
         response = t_cines.scan()

@@ -3,8 +3,8 @@ import json
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
-    t_cines = dynamodb.Table('t_cines')
-    t_usuarios = dynamodb.Table('t_usuarios')
+    t_cines = dynamodb.Table('${sls:stage}-t_cines')
+    t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')
     
     # Obtener user_id
     user_id = event.get('user_id')
@@ -46,7 +46,7 @@ def lambda_handler(event, context):
     t_cines.delete_item(
         Key={'cinema_id': cinema_id, 'district': district}
     )
-
+    
     return {
         'statusCode': 200,
         'body': json.dumps({'message': 'Cinema deleted successfully'})
