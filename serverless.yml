@@ -30,8 +30,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-usuario
-
+          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
+          
   LoginUsuario:
     handler: api-usuarios/LoginUsuario.lambda_handler
     runtime: python3.12
@@ -41,8 +41,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-usuario
-
+          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
+          
   ValidarToken:
     handler: api-usuarios/ValidarToken.lambda_handler
     runtime: python3.12
@@ -52,7 +52,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-usuario
+          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
 
   # api-peliculas (Node.js)
   AddMovie:
@@ -64,7 +64,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-pelicula
+          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
 
   UpdateMovie:
     handler: api-peliculas/Updatemovie.updateMovie
@@ -75,7 +75,7 @@ functions:
           method: put
           cors: true
           integration: lambda
-          name: api-pelicula
+          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
 
   DeleteMovie:
     handler: api-peliculas/Deletemovie.deleteMovie
@@ -86,7 +86,7 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          name: api-pelicula
+          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
 
   # api-reserva (Node.js)
   ListarPeliculas:
@@ -98,7 +98,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   RequestCinePerMovie:
     handler: api-reserva/RequestCinePerMovie.consultarCinesPorPelicula
@@ -109,7 +109,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   consultarHorariosPorCineYPelicula:
     handler: api-reserva/consultarHorariosPorCineYPelicula.consultarHorariosPorCineYPelicula
@@ -120,7 +120,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   SeatsAvailable:
     handler: api-reserva/SeatsAvailable.consultarDisponibilidadDeAsientos
@@ -131,7 +131,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   ReserveSeats:
     handler: api-reserva/ReserveSeats.reservarAsientos
@@ -142,7 +142,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   CancelSeats:
     handler: api-reserva/CancelSeats.cancelarReservaDeAsientos
@@ -153,7 +153,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-reserva
+          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
 
   # api-proyecciones (Python)
   AddProyection:
@@ -165,7 +165,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-proyecciones
+          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
 
   UpdateProyection:
     handler: api-proyecciones/UpdateProyection.lambda_handler
@@ -176,7 +176,7 @@ functions:
           method: put
           cors: true
           integration: lambda
-          name: api-proyecciones
+          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
 
   DeleteProyection:
     handler: api-proyecciones/DeleteProyection.lambda_handler
@@ -187,7 +187,7 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          name: api-proyecciones
+          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
 
   #api-compras (Node.js)
   GetHistorialCompra:
@@ -198,7 +198,7 @@ functions:
             method: get
             cors: true
             integration: lambda
-            name: api-compras
+            restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
 
     # Función para consultar detalles de una compra específica
   GetCompraEspecifica:
@@ -209,7 +209,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-compras
+          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
 
     # Función para filtrar compras por fecha
   CompraFecha:
@@ -220,7 +220,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-compras
+          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
 
     # Función para descargar recibo de compra
   DescargarCompra:
@@ -231,7 +231,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-compras
+          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
 
   # api-cine (Python)
   AddCine:
@@ -243,7 +243,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          name: api-cine
+          
 
   DeleteCine:
     handler: api-cine/DeleteCine.lambda_handler
@@ -254,7 +254,7 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          name: api-cine
+          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
 
   GetCineDetails:
     handler: api-cine/GetCineDetails.lambda_handler
@@ -265,7 +265,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-cine
+          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
 
   ListAllCines:
     handler: api-cine/ListAllCines.lambda_handler
@@ -276,7 +276,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-cine
+          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
   
   ListMoviesFromCine:
     handler: api-cine/ListMoviesFromCine.lambda_handler
@@ -287,7 +287,7 @@ functions:
           method: get
           cors: true
           integration: lambda
-          name: api-cine
+          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
   
   UpdateCine:
     handler: api-cine/UpdateCine.lambda_handler
@@ -298,7 +298,7 @@ functions:
           method: put
           cors: true
           integration: lambda
-          name: api-cine
+          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
 
 resources:
   Resources:
@@ -421,3 +421,45 @@ resources:
           - AttributeName: "token"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
+    
+    # API 1: API para usuarios
+    UsuarioApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: UsuarioApi
+        Description: API para la gestión de usuarios
+
+    # API 2: API para películas
+    PeliculasApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: PeliculasApi
+        Description: API para gestión de películas
+    
+    # API 3: API para reservas 
+    ReservaApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ReservaApi
+        Description: API para gestión de reservas
+    
+    # API 4: API para proyecciones
+    ProyeccionesApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ProyeccionesApi
+        Description: API para gestión de proyecciones
+
+    # API 5: API para compras
+    ComprasApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ComprasApi
+        Description: API para gestión de compras
+    
+    # API 6: API para cines
+    CinesApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: CinesApi
+        Description: API para gestión de cines
