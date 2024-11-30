@@ -6,7 +6,7 @@ provider:
   runtime: nodejs22.x
   stage: ${opt:stage, 'dev'}
   memorySize: 1024
-  timeout: 45
+  timeout: 29
   region: us-east-1
   iam:
     role: arn:aws:iam::880764721962:role/LabRole
