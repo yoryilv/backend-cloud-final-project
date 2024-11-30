@@ -3,7 +3,7 @@ service: backend-cine
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs22.x
   memorySize: 1024
   timeout: 30
   region: us-east-1
@@ -54,7 +54,7 @@ functions:
   # api-peliculas (Node.js)
   AddMovie:
     handler: api-peliculas/Addmovie.addMovie
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/agregar
@@ -64,7 +64,7 @@ functions:
 
   UpdateMovie:
     handler: api-peliculas/Updatemovie.updateMovie
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/actualizar
@@ -74,7 +74,7 @@ functions:
 
   DeleteMovie:
     handler: api-peliculas/Deletemovie.deleteMovie
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/eliminar
@@ -85,7 +85,7 @@ functions:
   # api-reserva (Node.js)
   ListarPeliculas:
     handler: api-reserva/ListarPeliculas.listarPeliculas
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/listar
@@ -95,7 +95,7 @@ functions:
 
   RequestCinePerMovie:
     handler: api-reserva/RequestCinePerMovie.consultarCinesPorPelicula
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/cines
@@ -105,7 +105,7 @@ functions:
 
   consultarHorariosPorCineYPelicula:
     handler: api-reserva/consultarHorariosPorCineYPelicula.consultarHorariosPorCineYPelicula
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/horarios
@@ -115,7 +115,7 @@ functions:
 
   SeatsAvailable:
     handler: api-reserva/SeatsAvailable.consultarDisponibilidadDeAsientos
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/asientos
@@ -125,7 +125,7 @@ functions:
 
   ReserveSeats:
     handler: api-reserva/ReserveSeats.reservarAsientos
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/reservar
@@ -135,7 +135,7 @@ functions:
 
   CancelSeats:
     handler: api-reserva/CancelSeats.cancelarReservaDeAsientos
-    runtime: nodejs14.x
+    runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/cancelar
