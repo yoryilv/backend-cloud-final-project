@@ -4,13 +4,13 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body); // Parsear el body de la solicitud
-        const { user_id, movie_id, title, genre, duration, rating } = body;
+        const { user_id, cinema_id, title, genre, duration, rating } = body;
 
         // Validar entrada
-        if (!user_id || !movie_id) {
+        if (!user_id || !title) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Faltan campos obligatorios: user_id o movie_id' }),
+                body: JSON.stringify({ error: 'Faltan campos obligatorios: user_id o title' }),
             };
         }
 
@@ -63,7 +63,7 @@ exports.handler = async (event) => {
         await dynamodb
             .update({
                 TableName: t_peliculas,
-                Key: { movie_id },
+                Key: { title },
                 UpdateExpression: `SET ${updateExpression.join(', ')}`,
                 ExpressionAttributeValues: expressionValues,
             })

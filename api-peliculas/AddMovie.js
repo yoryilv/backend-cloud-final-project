@@ -4,10 +4,10 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body); // Parsear el body de la solicitud
-        const { user_id, movie_id, title, genre, duration, rating } = body;
+        const { user_id, cinema_id, title, genre, duration, rating} = body;  // Añadir cinema_id
 
         // Validar entrada
-        if (!user_id || !movie_id || !title || !genre || !duration || !rating) {
+        if (!user_id ||!cinema_id || !title || !genre || !duration || !rating ) {  // Validación de cinema_id
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Faltan campos obligatorios' }),
@@ -30,12 +30,12 @@ exports.handler = async (event) => {
             };
         }
 
-        // Conectar a la tabla de películas
+        // Conectar a la tabla de películas y verificar si ya existe la película
         const t_peliculas = process.env.TABLE_NAME_PELICULAS;
         const existingMovie = await dynamodb
             .get({
                 TableName: t_peliculas,
-                Key: { movie_id },
+                Key: { cinema_id, title },  // Usar cinema_id y title como claves primarias
             })
             .promise();
 
@@ -46,12 +46,12 @@ exports.handler = async (event) => {
             };
         }
 
-        // Agregar la película
+        // Agregar la nueva película
         await dynamodb
             .put({
                 TableName: t_peliculas,
                 Item: {
-                    movie_id,
+                    cinema_id,
                     title,
                     genre,
                     duration,
@@ -68,7 +68,10 @@ exports.handler = async (event) => {
         console.error('Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error interno del servidor' }),
+            body: JSON.stringify({
+                error: 'Error interno del servidor',
+                details: error.message,
+            }),
         };
     }
 };

@@ -19,11 +19,13 @@ def lambda_handler(event, context):
         return {
             'statusCode': 403,
             'body': json.dumps({'error': 'User not found or role not defined'})
-        }
+        } 
     
     role = user_response['Item']['role']
     
     # Verificar permisos (solo admin puede crear cines)
+    # cinema_id del body == cinema_id del user_id,  "!=" => error 
+    #VERIFICAR CINEMA_ID DE USUUARIO + ROLE
     if role != 'admin':
         return {
             'statusCode': 403,
@@ -32,20 +34,19 @@ def lambda_handler(event, context):
     
     # Obtener los datos para crear el cine
     cinema_id = event.get('cinema_id')
-    name = event.get('name')
+    cinema_name = event.get('cinema_name')
     address = event.get('address')
-    district = event.get('district')
     number_of_halls = event.get('number_of_halls')
     
     # Validación de entrada
-    if not cinema_id or not name or not address or not district:
+    if not cinema_id or not cinema_name or not address or not number_of_halls:
         return {
             'statusCode': 400,
             'body': json.dumps({'error': 'Missing required fields'})
         }
     
     # Verificar si el cine ya existe
-    existing_cinema = t_cines.get_item(Key={'cinema_id': cinema_id, 'district': district})
+    existing_cinema = t_cines.get_item(Key={'cinema_id': cinema_id, 'cinema_name': cinema_name})
     if 'Item' in existing_cinema:
         return {
             'statusCode': 409,
@@ -56,9 +57,8 @@ def lambda_handler(event, context):
     t_cines.put_item(
         Item={
             'cinema_id': cinema_id,
-            'name': name,
+            'cinema_name': cinema_name, # NOMBRE AV O DISTRITO
             'address': address,
-            'district': district,
             'number_of_halls': number_of_halls
         }
     )

@@ -11,6 +11,7 @@ def hash_password(password):
 def lambda_handler(event, context):
     try:
         # Obtener el email y el password
+        cinema_id = event.get('cinema_id')
         user_id = event.get('user_id')
         password = event.get('password')
         role = event.get('role', 'client')
@@ -44,6 +45,7 @@ def lambda_handler(event, context):
             # Almacena los datos del user en la tabla de usuarios en DynamoDB
             t_usuarios.put_item(
                 Item={
+                    'cinema_id': cinema_id,
                     'user_id': user_id,
                     'password': hashed_password,
                     'role': role

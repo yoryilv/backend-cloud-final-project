@@ -4,13 +4,13 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body); // Parsear el body de la solicitud
-        const { user_id, movie_id } = body;
+        const { user_id, title, cinema_id } = body;
 
         // Validar entrada
-        if (!user_id || !movie_id) {
+        if (!user_id || !title || !cinema_id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Faltan campos obligatorios: user_id o movie_id' }),
+                body: JSON.stringify({ error: 'Faltan campos obligatorios: user_id, title o cinema_id' }),
             };
         }
 
@@ -30,12 +30,12 @@ exports.handler = async (event) => {
             };
         }
 
-        // Eliminar la película
+        // Eliminar la película (utilizando cinema_id y title como claves)
         const t_peliculas = process.env.TABLE_NAME_PELICULAS;
         await dynamodb
             .delete({
                 TableName: t_peliculas,
-                Key: { movie_id },
+                Key: { cinema_id, title },  // Usamos ambas claves
             })
             .promise();
 

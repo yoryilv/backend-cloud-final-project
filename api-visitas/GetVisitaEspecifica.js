@@ -1,23 +1,24 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-exports.consultarHistorial = async (event) => {
+exports.detalleCompra = async (event) => {
     try {
-        const { user_id } = JSON.parse(event.body);
+        const { user_id, date } = JSON.parse(event.body);
 
-        if (!user_id) {
+        if (!user_id || !date) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'El user_id es obligatorio.' }),
+                body: JSON.stringify({ error: 'El user_id y date son obligatorios.' }),
             };
         }
 
         const response = await dynamodb
             .query({
-                TableName: process.env.TABLE_NAME_COMPRAS,
-                KeyConditionExpression: 'user_id = :user_id',
+                TableName: process.env.TABLE_NAME_VISITAS,
+                KeyConditionExpression: 'user_id = :user_id AND date = :date',
                 ExpressionAttributeValues: {
                     ':user_id': user_id,
+                    ':date': date,
                 },
             })
             .promise();
@@ -25,10 +26,11 @@ exports.consultarHistorial = async (event) => {
         if (!response.Items || response.Items.length === 0) {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: 'No se encontraron compras para este usuario.' }),
+                body: JSON.stringify({ error: 'No se encontraron visitas para el usuario en la fecha especificada.' }),
             };
         }
 
+        // Si se encuentran visitas, retornarlas en la respuesta
         return {
             statusCode: 200,
             body: JSON.stringify(response.Items),

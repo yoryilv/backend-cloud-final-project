@@ -33,18 +33,18 @@ def lambda_handler(event, context):
     
     # Obtener cinema_id y district directamente del evento
     cinema_id = event.get('cinema_id')
-    district = event.get('district')
+    cinema_name = event.get('cinema_name')
     
     # Validación de entrada
-    if not cinema_id or not district:
+    if not cinema_id or not cinema_name:
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'cinema_id and district are required'})
+            'body': json.dumps({'error': 'cinema_id and cinema_name are required'})
         }
     
     # Eliminar el cine
     t_cines.delete_item(
-        Key={'cinema_id': cinema_id, 'district': district}
+        Key={'cinema_id': cinema_id, 'cinema_name': cinema_name}
     )
     
     return {

@@ -17,7 +17,7 @@ provider:
     TABLE_NAME_PELICULAS: ${sls:stage}-t_peliculas
     TABLE_NAME_FUNCIONES: ${sls:stage}-t_funciones
     TABLE_NAME_PROYECCIONES: ${sls:stage}-t_proyecciones
-    TABLE_NAME_COMPRAS: ${sls:stage}-t_compras
+    TABLE_NAME_VISITAS: ${sls:stage}-t_visitas
     TABLE_NAME_TOKEN_ACCESO: ${sls:stage}-t_token_acceso
 
 functions:
@@ -94,74 +94,26 @@ functions:
           integration: lambda
           restApiId:
             Ref: PeliculasApiGateway
+    
+  Cartelera:
+    handler: api-peliculas/Cartelera.cartelera
+    runtime: nodejs22.x
+    events:
+      - http:
+          path: /pelicula/cartelera
+          method: get
+          cors: true
+          integration: lambda
+          restApiId:
+            Ref: PeliculasApiGateway
 
   # api-reserva (Node.js)
-  ListarPeliculas:
-    handler: api-reserva/ListarPeliculas.listarPeliculas
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/listar
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
-  RequestCinePerMovie:
-    handler: api-reserva/RequestCinePerMovie.consultarCinesPorPelicula
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/cines
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
-  consultarHorariosPorCineYPelicula:
-    handler: api-reserva/consultarHorariosPorCineYPelicula.consultarHorariosPorCineYPelicula
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/horarios
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
-  SeatsAvailable:
-    handler: api-reserva/SeatsAvailable.consultarDisponibilidadDeAsientos
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/asientos
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
   ReserveSeats:
     handler: api-reserva/ReserveSeats.reservarAsientos
     runtime: nodejs22.x
     events:
       - http:
           path: /pelicula/reservar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
-  CancelSeats:
-    handler: api-reserva/CancelSeats.cancelarReservaDeAsientos
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/cancelar
           method: post
           cors: true
           integration: lambda
@@ -205,53 +157,41 @@ functions:
           restApiId:
             Ref: ProyeccionesApiGateway
 
-  #api-compras (Node.js)
-  GetHistorialCompra:
-      handler: api-compras/GetHistorialCompra.getHistorialCompra
+  #api-visitas (Node.js)
+  GetHistorialVisita:
+      handler: api-visitas/GetHistorialVisita.getHistorialVisita
       events:
         - http:
-            path: /compras/historial
+            path: /visita/historial
             method: get
             cors: true
             integration: lambda
             restApiId:
-              Ref: ComprasApiGateway
+              Ref: VisitasApiGateway
 
     # Función para consultar detalles de una compra específica
-  GetCompraEspecifica:
-    handler: api-compras/GetCompraEspecifica.getCompraEspecifica
+  GetVisitaEspecifica:
+    handler: api-visitas/GetVisitaEspecifica.GetVisitaEspecifica
     events:
       - http:
-          path: /compras/detalle
+          path: /visita/detalle
           method: get
           cors: true
           integration: lambda
           restApiId:
-            Ref: ComprasApiGateway
+            Ref: VisitasApiGateway
 
-    # Función para filtrar compras por fecha
-  CompraFecha:
-    handler: api-compras/CompraFecha.compraFecha
+    # Función para filtrar visitas por fecha
+  VisitaPorFecha:
+    handler: api-visitas/CompraFecha.compraFecha
     events:
       - http:
-          path: /compras/filtrar
+          path: /visitas/filtrar
           method: get
           cors: true
           integration: lambda
           restApiId:
-            Ref: ComprasApiGateway
-
-    # Función para descargar recibo de compra
-  DescargarCompra:
-    handler: api-compras/DescargarCompra.descargarReciboCompra
-    events:
-      - http:
-          path: /compras/recibo
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ComprasApiGateway
+            Ref: VisitasApiGateway
 
   # api-cine (Python)
   AddCine:
@@ -297,18 +237,6 @@ functions:
     events:
       - http:
           path: /cine/listar
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
-  
-  ListMoviesFromCine:
-    handler: api-cine/ListMoviesFromCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/peliculas/listar
           method: get
           cors: true
           integration: lambda
@@ -427,7 +355,7 @@ resources:
     ComprasTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.TABLE_NAME_COMPRAS}
+        TableName: ${self:provider.environment.TABLE_NAME_VISITAS}
         AttributeDefinitions:
           - AttributeName: "compra_id"
             AttributeType: "S"
@@ -473,11 +401,11 @@ resources:
         Name: ${self:provider.stage}-ProyeccionesApi  
         Description: API para gestión de proyecciones
 
-    ComprasApiGateway:
+    VisitasApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: ${self:provider.stage}-ComprasApi  
-        Description: API para gestión de compras
+        Name: ${self:provider.stage}-VisitasApi  
+        Description: API para gestión de visitas
     
     CinesApiGateway:
       Type: AWS::ApiGateway::RestApi

@@ -6,6 +6,7 @@ def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     t_proyecciones = dynamodb.Table('${sls:stage}-t_proyecciones')  # Nombre dinámico de la tabla de proyecciones
     t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')  # Nombre dinámico de la tabla de usuarios
+    t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Nombre dinámico de la tabla de cines
     
     # Verificar permisos del usuario
     user_id = event.get('user_id')
@@ -25,21 +26,30 @@ def lambda_handler(event, context):
     
     # Obtener los identificadores clave
     cinema_id = event.get('cinema_id')
+    cinema_name = event.get('cinema_name')
     show_id = event.get('show_id')
     
-    if not cinema_id or not show_id:
+    if not cinema_id or not cinema_name or not show_id:
         return {
             'statusCode': 400,
             'body': json.dumps({'error': 'cinema_id and show_id are required'})
         }
-    
+
+    # Verificar si el cine existe en la tabla t_cines
+    cinema_response = t_cines.get_item(Key={'cinema_id': cinema_id})
+    if 'Item' not in cinema_response:
+        return {
+            'statusCode': 404,
+            'body': json.dumps({'error': 'Cinema not found'})
+        }
+
     # Construir la expresión de actualización con los campos en el body
     update_expression = "SET "
     expression_values = {}
     expression_names = {}  # Inicializar como un diccionario vacío
 
     # Campos para actualizar
-    fields_to_update = ['movie_id', 'hall', 'start_time', 'end_time']
+    fields_to_update = ['cinema_id','cinema_name','show_id', 'hall', 'start_time', 'end_time']
 
     for field in fields_to_update:
         if event.get(field) is not None:
@@ -63,7 +73,7 @@ def lambda_handler(event, context):
 
     # Ejecutar la actualización, incluyendo ExpressionAttributeNames solo si es necesario
     update_params = {
-        'Key': {'cinema_id': cinema_id, 'show_id': show_id},
+        'Key': {'cinema_id': cinema_id,'cinema_name': cinema_name, 'show_id': show_id},
         'UpdateExpression': update_expression,
         'ExpressionAttributeValues': expression_values
     }

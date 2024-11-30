@@ -1,25 +1,23 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-exports.filtrarCompras = async (event) => {
+exports.consultarHistorial = async (event) => {
     try {
-        const { user_id, start_date, end_date } = JSON.parse(event.body);
+        const { user_id } = JSON.parse(event.body);
 
-        if (!user_id || !start_date || !end_date) {
+        if (!user_id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'El user_id, start_date y end_date son obligatorios.' }),
+                body: JSON.stringify({ error: 'El user_id es obligatorio.' }),
             };
         }
 
         const response = await dynamodb
             .query({
-                TableName: process.env.TABLE_NAME_COMPRAS,
-                KeyConditionExpression: 'user_id = :user_id AND purchase_date BETWEEN :start_date AND :end_date',
+                TableName: process.env.TABLE_NAME_VISITAS,
+                KeyConditionExpression: 'user_id = :user_id',
                 ExpressionAttributeValues: {
                     ':user_id': user_id,
-                    ':start_date': start_date,
-                    ':end_date': end_date,
                 },
             })
             .promise();
@@ -27,7 +25,7 @@ exports.filtrarCompras = async (event) => {
         if (!response.Items || response.Items.length === 0) {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: 'No se encontraron compras en el rango de fechas especificado.' }),
+                body: JSON.stringify({ error: 'No se encontraron visitas para este usuario.' }),
             };
         }
 
@@ -36,11 +34,11 @@ exports.filtrarCompras = async (event) => {
             body: JSON.stringify(response.Items),
         };
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al consultar el historial:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: 'Error interno del servidor',
+                error: 'Error interno al consultar el historial de visitas.',
                 details: error.message,
             }),
         };

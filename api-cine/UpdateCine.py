@@ -34,20 +34,19 @@ def lambda_handler(event, context):
     
     # Obtener los datos para actualizar el cine
     cinema_id = event.get('cinema_id')
-    district = event.get('district')
-    name = event.get('name')
+    cinema_name = event.get('cinema_name')
     address = event.get('address')
     number_of_halls = event.get('number_of_halls')
 
     # Construir expresiones de actualización
     update_expression = "SET "
     expression_values = {}
-    expression_names = {}  # Almacenar los alias de nombres de atributos reservados
+    expression_attribute_names = {}  # Almacenar los alias de nombres de atributos reservados
     
-    if name:
-        update_expression += "#nm = :name, "  # Alias para "name"
-        expression_values[":name"] = name
-        expression_names["#nm"] = "name"  # Alias que sustituye "name"
+    if cinema_name:
+        update_expression += "#nm = :cinema_name, "  # Alias para "cinema_name"
+        expression_values[":cinema_name"] = cinema_name
+        expression_attribute_names["#nm"] = "cinema_name"  # Alias que sustituye "cinema_name"
     if address:
         update_expression += "address = :address, "
         expression_values[":address"] = address
@@ -65,12 +64,12 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': 'No fields to update'})
         }
 
-    # Ejecutar la actualización con el alias para el atributo "name"
+    # Ejecutar la actualización
     t_cines.update_item(
-        Key={'cinema_id': cinema_id, 'district': district},
+        Key={'cinema_id': cinema_id},  # Asegúrate de usar solo la clave primaria adecuada
         UpdateExpression=update_expression,
         ExpressionAttributeValues=expression_values,
-        ExpressionAttributeNames=expression_names  # Agregar los alias aquí
+        ExpressionAttributeNames=expression_attribute_names  # Agregar los alias aquí
     )
     
     return {
