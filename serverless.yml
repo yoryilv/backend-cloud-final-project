@@ -447,9 +447,7 @@ resources:
           - AttributeName: "token"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
-    
-    resources:
-  Resources:
+
     UsuarioApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
