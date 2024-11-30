@@ -30,7 +30,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
+          restApiId:
+            Ref: UsuarioApiGateway
           
   LoginUsuario:
     handler: api-usuarios/LoginUsuario.lambda_handler
@@ -41,7 +42,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
+          restApiId:
+            Ref: UsuarioApiGateway
           
   ValidarToken:
     handler: api-usuarios/ValidarToken.lambda_handler
@@ -52,7 +54,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.UsuarioApiGateway.Ref}
+          restApiId:
+            Ref: UsuarioApiGateway
 
   # api-peliculas (Node.js)
   AddMovie:
@@ -64,7 +67,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
+          restApiId:
+            Ref: PeliculasApiGateway
 
   UpdateMovie:
     handler: api-peliculas/Updatemovie.updateMovie
@@ -75,7 +79,8 @@ functions:
           method: put
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
+          restApiId:
+            Ref: PeliculasApiGateway
 
   DeleteMovie:
     handler: api-peliculas/Deletemovie.deleteMovie
@@ -86,7 +91,8 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.PeliculasApiGateway.Ref}
+          restApiId:
+            Ref: PeliculasApiGateway
 
   # api-reserva (Node.js)
   ListarPeliculas:
@@ -98,7 +104,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   RequestCinePerMovie:
     handler: api-reserva/RequestCinePerMovie.consultarCinesPorPelicula
@@ -109,7 +116,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   consultarHorariosPorCineYPelicula:
     handler: api-reserva/consultarHorariosPorCineYPelicula.consultarHorariosPorCineYPelicula
@@ -120,7 +128,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   SeatsAvailable:
     handler: api-reserva/SeatsAvailable.consultarDisponibilidadDeAsientos
@@ -131,7 +140,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   ReserveSeats:
     handler: api-reserva/ReserveSeats.reservarAsientos
@@ -142,7 +152,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   CancelSeats:
     handler: api-reserva/CancelSeats.cancelarReservaDeAsientos
@@ -153,7 +164,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ReservaApiGateway.Ref}
+          restApiId:
+            Ref: ReservaApiGateway
 
   # api-proyecciones (Python)
   AddProyection:
@@ -165,7 +177,8 @@ functions:
           method: post
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
+          restApiId:
+            Ref: ProyeccionesApiGateway
 
   UpdateProyection:
     handler: api-proyecciones/UpdateProyection.lambda_handler
@@ -176,7 +189,8 @@ functions:
           method: put
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
+          restApiId:
+            Ref: ProyeccionesApiGateway
 
   DeleteProyection:
     handler: api-proyecciones/DeleteProyection.lambda_handler
@@ -187,7 +201,8 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ProyeccionesApiGateway.Ref}
+          restApiId:
+            Ref: ProyeccionesApiGateway
 
   #api-compras (Node.js)
   GetHistorialCompra:
@@ -198,7 +213,8 @@ functions:
             method: get
             cors: true
             integration: lambda
-            restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
+            restApiId:
+              Ref: ComprasApiGateway
 
     # Función para consultar detalles de una compra específica
   GetCompraEspecifica:
@@ -209,7 +225,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
+          restApiId:
+            Ref: ComprasApiGateway
 
     # Función para filtrar compras por fecha
   CompraFecha:
@@ -220,7 +237,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
+          restApiId:
+            Ref: ComprasApiGateway
 
     # Función para descargar recibo de compra
   DescargarCompra:
@@ -231,7 +249,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.ComprasApiGateway.Ref}
+          restApiId:
+            Ref: ComprasApiGateway
 
   # api-cine (Python)
   AddCine:
@@ -243,6 +262,8 @@ functions:
           method: post
           cors: true
           integration: lambda
+          restApiId:
+            Ref: CinesApiGateway
           
 
   DeleteCine:
@@ -254,7 +275,8 @@ functions:
           method: delete
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
+          restApiId:
+            Ref: CinesApiGateway
 
   GetCineDetails:
     handler: api-cine/GetCineDetails.lambda_handler
@@ -265,7 +287,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
+          restApiId:
+            Ref: CinesApiGateway
 
   ListAllCines:
     handler: api-cine/ListAllCines.lambda_handler
@@ -276,7 +299,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
+          restApiId:
+            Ref: CinesApiGateway
   
   ListMoviesFromCine:
     handler: api-cine/ListMoviesFromCine.lambda_handler
@@ -287,7 +311,8 @@ functions:
           method: get
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
+          restApiId:
+            Ref: CinesApiGateway
   
   UpdateCine:
     handler: api-cine/UpdateCine.lambda_handler
@@ -298,7 +323,8 @@ functions:
           method: put
           cors: true
           integration: lambda
-          restApiId: ${self:resources.Resources.CinesApiGateway.Ref}
+          restApiId:
+            Ref: CinesApiGateway
 
 resources:
   Resources:
