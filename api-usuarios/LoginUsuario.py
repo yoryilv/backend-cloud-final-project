@@ -1,6 +1,7 @@
 import boto3
 import hashlib
 import uuid
+import json
 from datetime import datetime, timedelta
 
 def hash_password(password):
@@ -8,10 +9,27 @@ def hash_password(password):
 
 def lambda_handler(event, context):
     try:
+        # Debug prints para ver qué está llegando
+        print("Evento completo:", event)
+        print("Tipo de evento:", type(event))
+        
+        # Si el evento viene de API Gateway, estará en el body
+        if isinstance(event.get('body'), str):
+            body = json.loads(event['body'])
+        else:
+            body = event
+            
+        print("Body procesado:", body)  # Ver el body después de procesarlo
+        print("Tipo de body:", type(body))
+        
+        # Verificar si cinema_id existe y su valor
+        print("cinema_id en body:", body.get('cinema_id'))
+        
         # Entrada (json)
-        cinema_id = event['cinema_id']  # Usando acceso directo como en tu código original
-        user_id = event['user_id']
-        password = event['password']
+        cinema_id = body['cinema_id']
+        print("cinema_id extraído:", cinema_id)  # Verificar el valor extraído
+        user_id = body['user_id']
+        password = body['password']
         
         hashed_password = hash_password(password)
         
@@ -49,13 +67,15 @@ def lambda_handler(event, context):
             }
 
     except KeyError as e:
-        print(f"Error: Campo faltante - {str(e)}")
+        print(f"Error KeyError: {str(e)}")
+        print(f"Contenido del body en el momento del error: {body}")
         return {
             'statusCode': 400,
             'body': f'Campo requerido faltante: {str(e)}'
         }
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error general: {str(e)}")
+        print(f"Tipo de error: {type(e)}")
         return {
             'statusCode': 500,
             'body': str(e)
