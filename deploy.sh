@@ -4,7 +4,7 @@ echo "Desplegando servicio general"
 sls deploy
 
 # Lista de directorios donde están los proyectos Serverless
-services=("api-cine" "api-peliculas" "api-proyecciones" "api-reserva" "api-usuarios" "api-visitas")
+services=("api-usuarios" "api-cine" "api-peliculas" "api-proyecciones" "api-reserva" "api-visitas")
 
 # Recorrer cada directorio y ejecutar el despliegue
 for service in "${services[@]}"

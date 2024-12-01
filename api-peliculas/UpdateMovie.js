@@ -22,63 +22,63 @@ exports.handler = async (event) => {
         const userResponse = await dynamodb
             .get({
                 TableName: t_usuarios,
-                Key: { user_id },
+                Key: { cinema_id, user_id },  // La clave primaria de la tabla usuarios es cinema_id + user_id
             })
             .promise();
 
-        if (!userResponse.Item || userResponse.Item.role !== 'admin' || userResponse.Item.cinema_id !== cinema_id) {
+        if (!userResponse.Item || userResponse.Item.role !== 'admin') {
             return {
                 statusCode: 403,
-                body: JSON.stringify({ error: 'Permiso denegado : el usuario no tiene acceso a este cine' }),
-                };
-        }
-
-
-        // Construir expresión de actualización
-        const updateExpression = [];
-        const expressionValues = {};
-
-        if (title) {
-            updateExpression.push('title = :title');
-            expressionValues[':title'] = title;
-        }
-        if (genre) {
-            updateExpression.push('genre = :genre');
-            expressionValues[':genre'] = genre;
-        }
-        if (duration) {
-            updateExpression.push('duration = :duration');
-            expressionValues[':duration'] = duration;
-        }
-        if (rating) {
-            updateExpression.push('rating = :rating');
-            expressionValues[':rating'] = rating;
-        }
-
-        if (updateExpression.length === 0) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'No hay campos para actualizar' }),
+                body: JSON.stringify({ error: 'Permiso denegado: el usuario no tiene acceso como admin' }),
             };
         }
 
-        // Actualizar la película
+        // Verificar que el cinema_id del usuario coincida con el cinema_id del cuerpo de la solicitud
+        if (userResponse.Item.cinema_id !== cinema_id) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ error: 'El usuario no tiene acceso a este cine' }),
+            };
+        }
+
+        // Consultar si la película ya existe en la tabla de Películas (con el cinema_id y el title)
         const t_peliculas = process.env.TABLE_NAME_PELICULAS;
-        await dynamodb
-            .update({
+        const movieResponse = await dynamodb
+            .get({
                 TableName: t_peliculas,
-                Key: { title }, // Asumo que la clave primaria es 'title' aquí
-                UpdateExpression: `SET ${updateExpression.join(', ')}`,
-                ExpressionAttributeValues: expressionValues,
+                Key: { cinema_id, title },  // La clave primaria de la tabla películas es cinema_id + title
             })
             .promise();
 
+        if (movieResponse.Item) {
+            return {
+                statusCode: 409,
+                body: JSON.stringify({ error: 'La película ya existe' }),
+            };
+        }
+
+        // Agregar la nueva película a la tabla Películas
+        await dynamodb
+            .put({
+                TableName: t_peliculas,
+                Item: {
+                    cinema_id,
+                    title,
+                    genre,
+                    duration,
+                    rating,
+                },
+            })
+            .promise();
+
+        // Responder con éxito
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Película actualizada correctamente' }),
+            body: JSON.stringify({ message: 'Película agregada exitosamente' }),
         };
+
     } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Error interno del servidor', details: error.message }),

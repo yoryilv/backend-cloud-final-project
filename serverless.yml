@@ -26,11 +26,15 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_USUARIOS}
         AttributeDefinitions:
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
           - AttributeName: "user_id"
             AttributeType: "S"
         KeySchema:
+          - AttributeName: "cinema_id"
+            KeyType: "HASH"  # Partition key
           - AttributeName: "user_id"
-            KeyType: "HASH"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
 
     # Tabla de Cines
@@ -41,13 +45,13 @@ resources:
         AttributeDefinitions:
           - AttributeName: "cinema_id"
             AttributeType: "S"
-          - AttributeName: "district"
+          - AttributeName: "cinema_name"
             AttributeType: "S"
         KeySchema:
           - AttributeName: "cinema_id"
-            KeyType: "HASH"
-          - AttributeName: "district"
-            KeyType: "RANGE"
+            KeyType: "HASH"  # Partition key
+          - AttributeName: "cinema_name"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
 
     # Tabla de Cartelera
@@ -56,15 +60,15 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_CARTELERA}
         AttributeDefinitions:
-          - AttributeName: "movie_id"
-            AttributeType: "S"
           - AttributeName: "cinema_id"
+            AttributeType: "S"
+          - AttributeName: "title"
             AttributeType: "S"
         KeySchema:
-          - AttributeName: "movie_id"
-            KeyType: "HASH"
           - AttributeName: "cinema_id"
-            KeyType: "RANGE"
+            KeyType: "HASH"  # Partition key
+          - AttributeName: "title"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
 
     # Tabla de Películas
@@ -73,11 +77,15 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_PELICULAS}
         AttributeDefinitions:
-          - AttributeName: "movie_id"
+          - AttributeName: "cinema_id"
+            AttributeType: "S"
+          - AttributeName: "title"
             AttributeType: "S"
         KeySchema:
-          - AttributeName: "movie_id"
-            KeyType: "HASH"
+          - AttributeName: "cinema_id"
+            KeyType: "HASH"  # Partition key
+          - AttributeName: "title"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
 
     # Tabla de Proyecciones
@@ -88,14 +96,30 @@ resources:
         AttributeDefinitions:
           - AttributeName: "cinema_id"
             AttributeType: "S"
-          - AttributeName: "show_id"
+          - AttributeName: "cinema_name"
             AttributeType: "S"
+          - AttributeName: "show_id"
+            AttributeType: "S"  # Agregado para filtrar por show_id
         KeySchema:
           - AttributeName: "cinema_id"
-            KeyType: "HASH"
-          - AttributeName: "show_id"
-            KeyType: "RANGE"
+            KeyType: "HASH"  # Partition key
+          - AttributeName: "cinema_name"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
+
+        # Índice Global Secundario (GSI) para filtrar por show_id
+        GlobalSecondaryIndexes:
+          - IndexName: "ShowIdIndex"
+            KeySchema:
+              - AttributeName: "cinema_id"
+                KeyType: "HASH"
+              - AttributeName: "show_id"
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     # Tabla de Visitas
     VisitasTable:
@@ -103,22 +127,26 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_VISITAS}
         AttributeDefinitions:
+          - AttributeName: "user_id"
+            AttributeType: "S"
           - AttributeName: "visita_id"
             AttributeType: "S"
         KeySchema:
+          - AttributeName: "user_id"
+            KeyType: "HASH"  # Partition key
           - AttributeName: "visita_id"
-            KeyType: "HASH"
+            KeyType: "RANGE" # Sort key
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla de Token de Acceso
+    # Tabla de Token de Acceso (sin cambios)
     TokenAccesoTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_TOKEN_ACCESO}
         AttributeDefinitions:
-          - AttributeName: "token"
+          - AttributeName: "token_id"
             AttributeType: "S"
         KeySchema:
-          - AttributeName: "token"
-            KeyType: "HASH"
+          - AttributeName: "token_id"
+            KeyType: "HASH"  # Partition key
         BillingMode: PAY_PER_REQUEST

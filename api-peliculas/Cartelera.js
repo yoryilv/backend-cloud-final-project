@@ -4,7 +4,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
     try {
         // Obtener el cinema_id desde la solicitud
-        const cinema_id = event.pathParameters.cinema_id;  // Obtener cinema_id de los parámetros de la URL
+        const cinema_id = event.pathParameters.cinema_id;
         if (!cinema_id) {
             return {
                 statusCode: 400,
@@ -12,9 +12,9 @@ exports.handler = async (event) => {
             };
         }
 
-        const tableName = `t_cartelera`;
+        const tableName = `t_peliculas`;
 
-        // Consultar todas las películas de la cartelera para el cinema_id
+        // Consultar todas las películas para el cinema_id
         const params = {
             TableName: tableName,
             KeyConditionExpression: 'cinema_id = :cinema_id',
@@ -26,11 +26,11 @@ exports.handler = async (event) => {
 
         const response = await dynamodb.query(params).promise();
 
-        // Verificar si hay películas en la cartelera
+        // Verificar si hay películas
         if (!response.Items || response.Items.length === 0) {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: 'No se encontraron películas en esta cartelera del cine' })
+                body: JSON.stringify({ error: 'No se encontraron películas para este cine' })
             };
         }
 
@@ -43,14 +43,10 @@ exports.handler = async (event) => {
             rating: movie.rating
         }));
 
-        const result = {
-            movies: moviesList,
-            lastEvaluatedKey: response.LastEvaluatedKey ? response.LastEvaluatedKey : null
-        };
-
+        // Responder con la lista de películas
         return {
             statusCode: 200,
-            body: JSON.stringify(result)
+            body: JSON.stringify(moviesList)
         };
 
     } catch (error) {

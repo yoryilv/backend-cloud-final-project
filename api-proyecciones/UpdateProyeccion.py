@@ -4,9 +4,9 @@ import json
 def lambda_handler(event, context):
     # Conectar con DynamoDB
     dynamodb = boto3.resource('dynamodb')
-    t_proyecciones = dynamodb.Table('t_proyecciones')  # Nombre dinámico de la tabla de proyecciones
-    t_usuarios = dynamodb.Table('t_usuarios')  # Nombre dinámico de la tabla de usuarios
-    t_cines = dynamodb.Table('t_cines')  # Nombre dinámico de la tabla de cines
+    t_proyecciones = dynamodb.Table('t_proyecciones')
+    t_usuarios = dynamodb.Table('t_usuarios')
+    t_cines = dynamodb.Table('t_cines')
     
     # Verificar permisos del usuario
     user_id = event.get('user_id')
@@ -71,7 +71,7 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': 'No fields to update'})
         }
 
-    # Ejecutar la actualización, incluyendo ExpressionAttributeNames solo si es necesario
+
     update_params = {
         'Key': {'cinema_id': cinema_id,'cinema_name': cinema_name, 'show_id': show_id},
         'UpdateExpression': update_expression,
