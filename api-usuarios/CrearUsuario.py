@@ -4,14 +4,15 @@ import json
 
 # Hashear contraseña
 def hash_password(password):
-    # Retorna la contraseña hasheada
     return hashlib.sha256(password.encode()).hexdigest()
 
 # Función que maneja el registro de user y validación del password
 def lambda_handler(event, context):
     try:
-        # Obtener el user y el password
-        body = json.loads(event.get('body', '{}'))  # Asegúrate de cargar el body JSON
+        # Obtener el body de la solicitud
+        body = json.loads(event.get('body', '{}'))  # Cargar el body JSON
+
+        # Extraer los campos del cuerpo de la solicitud
         cinema_id = body.get('cinema_id')
         user_id = body.get('user_id')
         password = body.get('password')
@@ -23,7 +24,7 @@ def lambda_handler(event, context):
             if not body.get(field):
                 return {
                     'statusCode': 400,
-                    'body': json.dumps({'error': f'Falta el campo obligatorio: {field}'})
+                    'body': json.dumps({'error': f'Falta el campo obligatorio: {field}'})  # Asegúrate de convertir el diccionario a JSON
                 }
 
         # Verificar que el rol sea válido
@@ -49,7 +50,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({'error': 'User already exists'})
             }
 
-        # Almacena los datos del user en la tabla de usuarios en DynamoDB
+        # Almacenar los datos del user en la tabla de usuarios en DynamoDB
         t_usuarios.put_item(
             Item={
                 'cinema_id': cinema_id,
@@ -59,11 +60,12 @@ def lambda_handler(event, context):
             }
         )
 
+        # Retornar un código de estado HTTP 200 (OK) y un mensaje de éxito
         return {
-            'statusCode': 201,
-            'body': json.dumps({'message': 'Usuario creado correctamente'})
+            'statusCode': 200,
+            'body': json.dumps({'message': 'User registered successfully'})
         }
-    
+
     except Exception as e:
         return {
             'statusCode': 500,
