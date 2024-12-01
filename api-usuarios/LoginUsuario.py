@@ -2,34 +2,33 @@ import boto3
 import hashlib
 import uuid
 import json
-from datetime import datetime, timedelta
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
     try:
-        # Debug prints para ver qué está llegando
-        print("Evento completo:", event)
-        print("Tipo de evento:", type(event))
-        
-        # Si el evento viene de API Gateway, estará en el body
-        if isinstance(event.get('body'), str):
-            body = json.loads(event['body'])
+        # Imprimir el evento para debug
+        print("Event recibido:", event)
+
+        # Intentar diferentes maneras de obtener el cinema_id
+        if isinstance(event, str):
+            data = json.loads(event)
         else:
-            body = event
-            
-        print("Body procesado:", body)  # Ver el body después de procesarlo
-        print("Tipo de body:", type(body))
-        
-        # Verificar si cinema_id existe y su valor
-        print("cinema_id en body:", body.get('cinema_id'))
-        
+            data = event
+
         # Entrada (json)
-        cinema_id = body['cinema_id']
-        print("cinema_id extraído:", cinema_id)  # Verificar el valor extraído
-        user_id = body['user_id']
-        password = body['password']
+        cinema_id = data.get('cinema_id')
+        user_id = data.get('user_id')
+        password = data.get('password')
+
+        print(f"Valores extraídos: cinema_id={cinema_id}, user_id={user_id}, password={password}")
+
+        if not cinema_id or not user_id or not password:
+            return {
+                'statusCode': 400,
+                'body': 'Faltan campos requeridos'
+            }
         
         hashed_password = hash_password(password)
         
@@ -66,16 +65,8 @@ def lambda_handler(event, context):
                 'body': 'Password incorrecto'
             }
 
-    except KeyError as e:
-        print(f"Error KeyError: {str(e)}")
-        print(f"Contenido del body en el momento del error: {body}")
-        return {
-            'statusCode': 400,
-            'body': f'Campo requerido faltante: {str(e)}'
-        }
     except Exception as e:
-        print(f"Error general: {str(e)}")
-        print(f"Tipo de error: {type(e)}")
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'body': str(e)
