@@ -1,32 +1,49 @@
 import boto3
 import hashlib
-import uuid # Genera valores únicos
+import uuid
 from datetime import datetime, timedelta
 
-# Hashear contraseña
 def hash_password(password):
-    # Retorna la contraseña hasheada
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
-    # Entrada (json)
-    user_id = event['user_id']
-    password = event['password']
-    hashed_password = hash_password(password)
-    # Proceso
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('t_usuarios')
-    response = table.get_item(
-        Key={
-            'user_id': user_id
-        }
-    )
-    if 'Item' not in response:
-        return {
-            'statusCode': 403,
-            'body': 'Usuario no existe'
-        }
-    else:
+    try:
+        print("Evento recibido:", event)  # Para debug
+        
+        # Manejo de diferentes formatos de entrada
+        if isinstance(event.get('body'), str):
+            import json
+            body = json.loads(event['body'])
+        else:
+            body = event
+            
+        # Entrada (json)
+        user_id = body.get('user_id')
+        password = body.get('password')
+        
+        if not user_id or not password:
+            return {
+                'statusCode': 400,
+                'body': 'Faltan campos requeridos (user_id, password)'
+            }
+            
+        hashed_password = hash_password(password)
+        
+        # Proceso
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('t_usuarios')
+        response = table.get_item(
+            Key={
+                'user_id': user_id
+            }
+        )
+        
+        if 'Item' not in response:
+            return {
+                'statusCode': 403,
+                'body': 'Usuario no existe'
+            }
+            
         hashed_password_bd = response['Item']['password']
         if hashed_password == hashed_password_bd:
             # Genera token
@@ -38,14 +55,20 @@ def lambda_handler(event, context):
             }
             table = dynamodb.Table('t_tokens_acceso')
             dynamodbResponse = table.put_item(Item = registro)
+            
+            return {
+                'statusCode': 200,
+                'token': token
+            }
         else:
             return {
                 'statusCode': 403,
                 'body': 'Password incorrecto'
             }
-    
-    # Salida (json)
-    return {
-        'statusCode': 200,
-        'token': token
-    }
+            
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Para debug
+        return {
+            'statusCode': 500,
+            'body': str(e)
+        }
