@@ -15,7 +15,7 @@ def lambda_handler(event, context):
 
         # Conectar con DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Nombre de la tabla corregido
+        t_cines = dynamodb.Table('t_cines')  # Nombre de la tabla corregido
 
         # Consulta en la tabla principal con cinema_id y cinema_name como claves
         response = t_cines.query(

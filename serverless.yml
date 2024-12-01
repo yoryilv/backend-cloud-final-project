@@ -4,256 +4,19 @@ service: backend-cine
 provider:
   name: aws
   runtime: nodejs22.x
-  stage: ${opt:stage, 'dev'}
   memorySize: 1024
   timeout: 29
   region: us-east-1
   iam:
     role: arn:aws:iam::880764721962:role/LabRole
   environment:
-    TABLE_NAME_USUARIOS: ${sls:stage}-t_usuarios
-    TABLE_NAME_CINES: ${sls:stage}-t_cines
-    TABLE_NAME_CARTELERA: ${sls:stage}-t_cartelera
-    TABLE_NAME_PELICULAS: ${sls:stage}-t_peliculas
-    TABLE_NAME_FUNCIONES: ${sls:stage}-t_funciones
-    TABLE_NAME_PROYECCIONES: ${sls:stage}-t_proyecciones
-    TABLE_NAME_VISITAS: ${sls:stage}-t_visitas
-    TABLE_NAME_TOKEN_ACCESO: ${sls:stage}-t_token_acceso
-
-functions:
-  # api-usuarios (Python)
-  CrearUsuario:
-    handler: api-usuarios/CrearUsuario.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /usuario/crear
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: UsuarioApiGateway
-          
-  LoginUsuario:
-    handler: api-usuarios/LoginUsuario.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /usuario/login
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: UsuarioApiGateway
-          
-  ValidarToken:
-    handler: api-usuarios/ValidarToken.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /usuario/validar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: UsuarioApiGateway
-
-  # api-peliculas (Node.js)
-  AddMovie:
-    handler: api-peliculas/Addmovie.addMovie
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/agregar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: PeliculasApiGateway
-
-  UpdateMovie:
-    handler: api-peliculas/Updatemovie.updateMovie
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/actualizar
-          method: put
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: PeliculasApiGateway
-
-  DeleteMovie:
-    handler: api-peliculas/Deletemovie.deleteMovie
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/eliminar
-          method: delete
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: PeliculasApiGateway
-    
-  Cartelera:
-    handler: api-peliculas/Cartelera.cartelera
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/cartelera
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: PeliculasApiGateway
-
-  # api-reserva (Node.js)
-  ReserveSeats:
-    handler: api-reserva/ReserveSeats.reservarAsientos
-    runtime: nodejs22.x
-    events:
-      - http:
-          path: /pelicula/reservar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ReservaApiGateway
-
-  # api-proyecciones (Python)
-  AddProyection:
-    handler: api-proyecciones/AddProyection.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /proyection/agregar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ProyeccionesApiGateway
-
-  UpdateProyection:
-    handler: api-proyecciones/UpdateProyection.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /proyection/actualizar
-          method: put
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ProyeccionesApiGateway
-
-  DeleteProyection:
-    handler: api-proyecciones/DeleteProyection.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /proyection/eliminar
-          method: delete
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: ProyeccionesApiGateway
-
-  #api-visitas (Node.js)
-  GetHistorialVisita:
-      handler: api-visitas/GetHistorialVisita.getHistorialVisita
-      events:
-        - http:
-            path: /visita/historial
-            method: get
-            cors: true
-            integration: lambda
-            restApiId:
-              Ref: VisitasApiGateway
-
-    # Función para consultar detalles de una compra específica
-  GetVisitaEspecifica:
-    handler: api-visitas/GetVisitaEspecifica.GetVisitaEspecifica
-    events:
-      - http:
-          path: /visita/detalle
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: VisitasApiGateway
-
-    # Función para filtrar visitas por fecha
-  VisitaPorFecha:
-    handler: api-visitas/CompraFecha.compraFecha
-    events:
-      - http:
-          path: /visitas/filtrar
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: VisitasApiGateway
-
-  # api-cine (Python)
-  AddCine:
-    handler: api-cine/AddCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/agregar
-          method: post
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
-          
-
-  DeleteCine:
-    handler: api-cine/DeleteCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/eliminar
-          method: delete
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
-
-  GetCineDetails:
-    handler: api-cine/GetCineDetails.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/consultar
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
-
-  ListAllCines:
-    handler: api-cine/ListAllCines.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/listar
-          method: get
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
-  
-  UpdateCine:
-    handler: api-cine/UpdateCine.lambda_handler
-    runtime: python3.12
-    events:
-      - http:
-          path: /cine/actualizar
-          method: put
-          cors: true
-          integration: lambda
-          restApiId:
-            Ref: CinesApiGateway
+    TABLE_NAME_USUARIOS: t_usuarios
+    TABLE_NAME_CINES: t_cines
+    TABLE_NAME_CARTELERA: t_cartelera
+    TABLE_NAME_PELICULAS: t_peliculas
+    TABLE_NAME_PROYECCIONES: t_proyecciones
+    TABLE_NAME_VISITAS: t_visitas
+    TABLE_NAME_TOKEN_ACCESO: t_token_acceso
 
 resources:
   Resources:
@@ -317,23 +80,6 @@ resources:
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
 
-    # Tabla de Funciones
-    FuncionesTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.TABLE_NAME_FUNCIONES}
-        AttributeDefinitions:
-          - AttributeName: "cinema_id"
-            AttributeType: "S"
-          - AttributeName: "show_id"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "cinema_id"
-            KeyType: "HASH"
-          - AttributeName: "show_id"
-            KeyType: "RANGE"
-        BillingMode: PAY_PER_REQUEST
-
     # Tabla de Proyecciones
     ProyeccionesTable:
       Type: AWS::DynamoDB::Table
@@ -350,17 +96,17 @@ resources:
           - AttributeName: "show_id"
             KeyType: "RANGE"
         BillingMode: PAY_PER_REQUEST
-      
-      # Tabla de Compras
-    ComprasTable:
+
+    # Tabla de Visitas
+    VisitasTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME_VISITAS}
         AttributeDefinitions:
-          - AttributeName: "compra_id"
+          - AttributeName: "visita_id"
             AttributeType: "S"
         KeySchema:
-          - AttributeName: "compra_id"
+          - AttributeName: "visita_id"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
 
@@ -376,39 +122,3 @@ resources:
           - AttributeName: "token"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
-
-    UsuarioApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-UsuarioApi  
-        Description: API para la gestión de usuarios
-
-    PeliculasApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-PeliculasApi  
-        Description: API para gestión de películas
-    
-    ReservaApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-ReservaApi  
-        Description: API para gestión de reservas
-    
-    ProyeccionesApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-ProyeccionesApi  
-        Description: API para gestión de proyecciones
-
-    VisitasApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-VisitasApi  
-        Description: API para gestión de visitas
-    
-    CinesApiGateway:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:provider.stage}-CinesApi  
-        Description: API para gestión de cines

@@ -7,11 +7,14 @@ exports.handler = async (event) => {
         const { user_id, cinema_id, title, genre, duration, rating} = body;  // Añadir cinema_id
 
         // Validar entrada
-        if (!user_id ||!cinema_id || !title || !genre || !duration || !rating ) {  // Validación de cinema_id
-            return {
+        const requiredFields = ['user_id', 'cinema_id', 'title', 'genre', 'duration', 'rating'];
+        for (let field of requiredFields) {
+            if (!body[field]) {
+                return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Faltan campos obligatorios' }),
-            };
+                body: JSON.stringify({ error: `Falta el campo obligatorio: ${field}` }),
+                };
+            }
         }
 
         // Conectar a la tabla de usuarios
@@ -23,10 +26,12 @@ exports.handler = async (event) => {
             })
             .promise();
 
-        if (!userResponse.Item || userResponse.Item.role !== 'admin') {
+        if (!userResponse.Item || userResponse.Item.role !== 'admin' || userResponse.Item.cinema_id !== cinema_id) {
             return {
                 statusCode: 403,
-                body: JSON.stringify({ error: 'Permiso denegado' }),
+                body: JSON.stringify({
+                    error: !userResponse.Item ? 'Permiso denegado' : 'El usuario no tiene acceso a este cine',
+                }),
             };
         }
 

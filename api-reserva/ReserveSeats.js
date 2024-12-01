@@ -18,7 +18,7 @@ module.exports.reservarAsientos = async (event) => {
         }
 
         const getParams = {
-            TableName: `${process.env.STAGE}-t_proyecciones`,
+            TableName: `t_proyecciones`,
             Key: { 
                 cinema_id: cinema_id,
                 cinema_name: cinema_name,
@@ -47,7 +47,7 @@ module.exports.reservarAsientos = async (event) => {
         }
 
         const updateParams = {
-            TableName: `${process.env.STAGE}-t_proyecciones`,
+            TableName: `t_proyecciones`,
             Key: { 
                 cinema_id: cinema_id, 
                 cinema_name: cinema_name,

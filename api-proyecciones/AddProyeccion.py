@@ -3,9 +3,9 @@ import json
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
-    t_proyecciones = dynamodb.Table('${sls:stage}-t_proyecciones')  # Tabla de proyecciones
-    t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')  # Tabla de usuarios
-    t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Tabla de cines
+    t_proyecciones = dynamodb.Table('t_proyecciones')  # Tabla de proyecciones
+    t_usuarios = dynamodb.Table('t_usuarios')  # Tabla de usuarios
+    t_cines = dynamodb.Table('t_cines')  # Tabla de cines
 
     # Verificar si el user_id está presente en la solicitud
     user_id = event.get('user_id')

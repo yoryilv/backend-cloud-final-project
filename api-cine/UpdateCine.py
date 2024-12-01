@@ -4,8 +4,8 @@ from boto3.dynamodb.conditions import Key
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
-    t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Nombre dinámico de la tabla de cines
-    t_usuarios = dynamodb.Table('${sls:stage}-t_usuarios')  # Nombre dinámico de la tabla de usuarios
+    t_cines = dynamodb.Table('t_cines')  # Nombre dinámico de la tabla de cines
+    t_usuarios = dynamodb.Table('t_usuarios')  # Nombre dinámico de la tabla de usuarios
     
     # Obtener user_id
     user_id = event.get('user_id')

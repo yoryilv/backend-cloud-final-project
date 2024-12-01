@@ -35,7 +35,7 @@ def lambda_handler(event, context):
 
         # Conectar con DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('${sls:stage}-t_usuarios')
+        table = dynamodb.Table('t_usuarios')
 
         # Verificar si el usuario ya existe en la tabla de usuarios
         response = table.get_item(

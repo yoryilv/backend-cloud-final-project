@@ -6,12 +6,15 @@ exports.handler = async (event) => {
         const body = JSON.parse(event.body); // Parsear el body de la solicitud
         const { user_id, cinema_id, title, genre, duration, rating } = body;
 
-        // Validar entrada
-        if (!user_id || !title) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Faltan campos obligatorios: user_id o title' }),
-            };
+        // Validar campos obligatorios
+        const requiredFields = ['user_id', 'title', 'cinema_id'];
+        for (let field of requiredFields) {
+            if (!body[field]) {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ error: `Falta el campo obligatorio: ${field}` }),
+                };
+            }
         }
 
         // Verificar permisos del usuario
@@ -23,12 +26,13 @@ exports.handler = async (event) => {
             })
             .promise();
 
-        if (!userResponse.Item || userResponse.Item.role !== 'admin') {
+        if (!userResponse.Item || userResponse.Item.role !== 'admin' || userResponse.Item.cinema_id !== cinema_id) {
             return {
                 statusCode: 403,
-                body: JSON.stringify({ error: 'Permiso denegado' }),
-            };
+                body: JSON.stringify({ error: 'Permiso denegado : el usuario no tiene acceso a este cine' }),
+                };
         }
+
 
         // Construir expresión de actualización
         const updateExpression = [];
@@ -63,7 +67,7 @@ exports.handler = async (event) => {
         await dynamodb
             .update({
                 TableName: t_peliculas,
-                Key: { title },
+                Key: { title }, // Asumo que la clave primaria es 'title' aquí
                 UpdateExpression: `SET ${updateExpression.join(', ')}`,
                 ExpressionAttributeValues: expressionValues,
             })

@@ -12,8 +12,7 @@ exports.handler = async (event) => {
             };
         }
 
-        // Obtener el nombre dinámico de la tabla de Cartelera
-        const tableName = `${process.env.STAGE}-t_cartelera`;  // Usa la variable de entorno STAGE
+        const tableName = `t_cartelera`;
 
         // Consultar todas las películas de la cartelera para el cinema_id
         const params = {
@@ -21,7 +20,8 @@ exports.handler = async (event) => {
             KeyConditionExpression: 'cinema_id = :cinema_id',
             ExpressionAttributeValues: {
                 ':cinema_id': cinema_id
-            }
+            },
+            ExclusiveStartKey: event.queryStringParameters?.lastEvaluatedKey || null,  // Paginación
         };
 
         const response = await dynamodb.query(params).promise();
@@ -43,10 +43,14 @@ exports.handler = async (event) => {
             rating: movie.rating
         }));
 
-        // Responder con la lista de películas
+        const result = {
+            movies: moviesList,
+            lastEvaluatedKey: response.LastEvaluatedKey ? response.LastEvaluatedKey : null
+        };
+
         return {
             statusCode: 200,
-            body: JSON.stringify(moviesList)
+            body: JSON.stringify(result)
         };
 
     } catch (error) {

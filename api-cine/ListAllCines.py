@@ -13,7 +13,7 @@ def lambda_handler(event, context):
         
         # Conectar con DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        t_cines = dynamodb.Table('${sls:stage}-t_cines')  # Nombre dinámico de la tabla
+        t_cines = dynamodb.Table('t_cines')  # Nombre dinámico de la tabla
 
        # Consulta en la tabla principal con cinema_id como clave
         response = t_cines.query(
