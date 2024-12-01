@@ -1,5 +1,5 @@
 org: jorgeleandro
-service: backend-cine
+service: tablas
 
 provider:
   name: aws

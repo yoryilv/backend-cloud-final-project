@@ -16,7 +16,7 @@ provider:
 functions: 
   #api-visitas (Node.js)
   GetHistorialVisita:
-      handler: api-visitas/GetHistorialVisita.getHistorialVisita
+      handler: GetHistorialVisita.getHistorialVisita
       events:
         - http:
             path: /visitas/historial
@@ -25,7 +25,7 @@ functions:
             integration: lambda
 
   GetVisitaEspecifica:
-    handler: api-visitas/GetVisitaEspecifica.GetVisitaEspecifica
+    handler: GetVisitaEspecifica.GetVisitaEspecifica
     events:
       - http:
           path: /visitas/detalle
@@ -34,7 +34,7 @@ functions:
           integration: lambda
 
   VisitaPorFecha:
-    handler: api-visitas/CompraFecha.compraFecha
+    handler: CompraFecha.compraFecha
     events:
       - http:
           path: /visitas/filtrar

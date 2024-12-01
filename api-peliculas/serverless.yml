@@ -17,7 +17,7 @@ provider:
 
 functions:
   AddMovie:
-    handler: api-peliculas/Addmovie.addMovie
+    handler: Addmovie.addMovie
     events:
       - http:
           path: /pelicula/agregar
@@ -26,7 +26,7 @@ functions:
           integration: lambda
 
   UpdateMovie:
-    handler: api-peliculas/Updatemovie.updateMovie
+    handler: Updatemovie.updateMovie
     events:
       - http:
           path: /pelicula/actualizar
@@ -35,7 +35,7 @@ functions:
           integration: lambda
 
   DeleteMovie:
-    handler: api-peliculas/Deletemovie.deleteMovie
+    handler: Deletemovie.deleteMovie
     events:
       - http:
           path: /pelicula/eliminar
@@ -44,7 +44,7 @@ functions:
           integration: lambda
     
   Cartelera:
-    handler: api-peliculas/Cartelera.cartelera
+    handler: Cartelera.cartelera
     events:
       - http:
           path: /pelicula/{cinema_id}

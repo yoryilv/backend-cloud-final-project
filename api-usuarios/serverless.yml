@@ -16,7 +16,7 @@ provider:
 functions:
   # api-usuarios (Python)
   CrearUsuario:
-    handler: api-usuarios/CrearUsuario.lambda_handler
+    handler: CrearUsuario.lambda_handler
     events:
       - http:
           path: /usuario/crear
@@ -25,7 +25,7 @@ functions:
           integration: lambda
           
   LoginUsuario:
-    handler: api-usuarios/LoginUsuario.lambda_handler
+    handler: LoginUsuario.lambda_handler
     events:
       - http:
           path: /usuario/login
@@ -34,7 +34,7 @@ functions:
           integration: lambda
           
   ValidarToken:
-    handler: api-usuarios/ValidarToken.lambda_handler
+    handler: ValidarToken.lambda_handler
     events:
       - http:
           path: /usuario/validar

@@ -18,7 +18,7 @@ provider:
 
 functions:
   AddProyection:
-    handler: api-proyecciones/AddProyection.lambda_handler
+    handler: AddProyection.lambda_handler
     events:
       - http:
           path: /proyecciones/agregar
@@ -27,7 +27,7 @@ functions:
           integration: lambda
 
   UpdateProyection:
-    handler: api-proyecciones/UpdateProyection.lambda_handler
+    handler: UpdateProyection.lambda_handler
     events:
       - http:
           path: /proyecciones/actualizar
@@ -36,7 +36,7 @@ functions:
           integration: lambda
 
   DeleteProyection:
-    handler: api-proyecciones/DeleteProyection.lambda_handler
+    handler: DeleteProyection.lambda_handler
     events:
       - http:
           path: /proyecciones/eliminar

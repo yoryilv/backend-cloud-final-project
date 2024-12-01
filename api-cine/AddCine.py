@@ -23,9 +23,6 @@ def lambda_handler(event, context):
     
     role = user_response['Item']['role']
     
-    # Verificar permisos (solo admin puede crear cines)
-    # cinema_id del body == cinema_id del user_id,  "!=" => error 
-    #VERIFICAR CINEMA_ID DE USUUARIO + ROLE
     if role != 'admin':
         return {
             'statusCode': 403,
