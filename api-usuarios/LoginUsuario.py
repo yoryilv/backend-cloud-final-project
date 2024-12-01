@@ -1,10 +1,10 @@
 import boto3
 import hashlib
 import uuid
-from datetime import datetime, timedelta
 
-# Hashear contraseña
 def hash_password(password):
+    if password is None:
+        return None
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
@@ -14,6 +14,13 @@ def lambda_handler(event, context):
         user_id = event.get('user_id')
         password = event.get('password')
         
+        # Verificar si los campos requeridos existen
+        if not all([cinema_id, user_id, password]):
+            return {
+                'statusCode': 400,
+                'body': 'Faltan campos requeridos'
+            }
+
         hashed_password = hash_password(password)
 
         # Proceso
@@ -32,24 +39,25 @@ def lambda_handler(event, context):
                 'statusCode': 403,
                 'body': 'Usuario no existe'
             }
-        else:
-            hashed_password_bd = response['Item']['password']
+        
+        hashed_password_bd = response['Item']['password']
             
-            if hashed_password == hashed_password_bd:
-                # Genera token
-                token = str(uuid.uuid4())
-                
-                return {
-                    'statusCode': 200,
-                    'token': token
-                }
-            else:
-                return {
-                    'statusCode': 403,
-                    'body': 'Password incorrecto'
-                }
+        if hashed_password == hashed_password_bd:
+            # Genera token
+            token_id = str(uuid.uuid4())
+            
+            return {
+                'statusCode': 200,
+                'token_id': token_id
+            }
+        else:
+            return {
+                'statusCode': 403,
+                'body': 'Password incorrecto'
+            }
 
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'body': str(e)
