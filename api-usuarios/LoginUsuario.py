@@ -2,38 +2,41 @@ import boto3
 import hashlib
 import uuid
 from datetime import datetime, timedelta
+from boto3.dynamodb.conditions import Key
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
     try:
-        print("Evento recibido:", event)  # Para debug
-        
-        # Manejo de diferentes formatos de entrada
-        if isinstance(event.get('body'), str):
-            import json
-            body = json.loads(event['body'])
-        else:
-            body = event
-            
         # Entrada (json)
-        user_id = body.get('user_id')
-        password = body.get('password')
+        user_id = event['user_id']
+        password = event['password']
         
-        if not user_id or not password:
-            return {
-                'statusCode': 400,
-                'body': 'Faltan campos requeridos (user_id, password)'
-            }
-            
         hashed_password = hash_password(password)
         
         # Proceso
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('t_usuarios')
+        
+        # Primero buscar el cinema_id usando scan
+        response_scan = table.scan(
+            FilterExpression=Key('user_id').eq(user_id)
+        )
+        
+        if not response_scan['Items']:
+            return {
+                'statusCode': 403,
+                'body': 'Usuario no existe'
+            }
+        
+        # Obtener el cinema_id del resultado
+        cinema_id = response_scan['Items'][0]['cinema_id']
+        
+        # Ahora hacer get_item con la clave compuesta completa
         response = table.get_item(
             Key={
+                'cinema_id': cinema_id,
                 'user_id': user_id
             }
         )
@@ -67,7 +70,7 @@ def lambda_handler(event, context):
             }
             
     except Exception as e:
-        print(f"Error: {str(e)}")  # Para debug
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'body': str(e)
