@@ -9,8 +9,8 @@ def hash_password(password):
 # Función que maneja el registro de user y validación del password
 def lambda_handler(event, context):
     try:
-        # Obtener el body de la solicitud
-        body = json.loads(event.get('body', '{}'))  # Cargar el body JSON
+        # Obtener el body de la solicitud (en formato JSON string)
+        body = json.loads(event.get('body', '{}'))  # Asegúrate de convertir el JSON a dict
 
         # Extraer los campos del cuerpo de la solicitud
         cinema_id = body.get('cinema_id')
@@ -24,7 +24,7 @@ def lambda_handler(event, context):
             if not body.get(field):
                 return {
                     'statusCode': 400,
-                    'body': json.dumps({'error': f'Falta el campo obligatorio: {field}'})  # Asegúrate de convertir el diccionario a JSON
+                    'body': json.dumps({'error': f'Falta el campo obligatorio: {field}'})  # Convertir a JSON
                 }
 
         # Verificar que el rol sea válido
@@ -32,24 +32,24 @@ def lambda_handler(event, context):
         if role not in valid_roles:
             return {
                 'statusCode': 400,
-                'body': json.dumps({'error': 'Rol Invalido. Debe ser "client" o "admin"'})
+                'body': json.dumps({'error': 'Rol inválido. Debe ser "client" o "admin"'})  # Convertir a JSON
             }
 
-        # Hashea la contraseña antes de almacenarla
+        # Hashear la contraseña antes de almacenarla
         hashed_password = hash_password(password)
-
+        
         # Conectar DynamoDB
         dynamodb = boto3.resource('dynamodb')
         t_usuarios = dynamodb.Table('t_usuarios')
-
+        
         # Verificar si el usuario ya existe
-        existing_user = t_usuarios.get_item(Key={'user_id': user_id})
+        existing_user = t_usuarios.get_item(Key={'cinema_id': cinema_id, 'user_id': user_id})
         if 'Item' in existing_user:
             return {
                 'statusCode': 409,
-                'body': json.dumps({'error': 'User already exists'})
+                'body': json.dumps({'error': 'El usuario ya existe'})  # Convertir a JSON
             }
-
+        
         # Almacenar los datos del user en la tabla de usuarios en DynamoDB
         t_usuarios.put_item(
             Item={
@@ -59,15 +59,15 @@ def lambda_handler(event, context):
                 'role': role
             }
         )
-
+        
         # Retornar un código de estado HTTP 200 (OK) y un mensaje de éxito
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'User registered successfully'})
+            'body': json.dumps({'message': 'Usuario creado exitosamente'})  # Convertir a JSON
         }
-
+    
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps({'error': str(e)})  # Convertir el error a JSON
         }
