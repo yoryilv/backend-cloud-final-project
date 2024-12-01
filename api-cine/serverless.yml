@@ -13,7 +13,6 @@ provider:
     TABLE_NAME_USUARIOS: t_usuarios
     TABLE_NAME_CINES: t_cines
 
-
 functions:
   # api-cine (Python)
   AddCine:
@@ -25,6 +24,7 @@ functions:
           cors: true
           integration: lambda
           
+
   DeleteCine:
     handler: DeleteCine.lambda_handler
     events:

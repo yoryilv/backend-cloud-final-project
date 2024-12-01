@@ -1,13 +1,18 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-exports.handler = async (event) => {
+exports.lambda_handler = async (event) => {
     try {
-        const body = JSON.parse(event.body); // Parsear el body de la solicitud
+        // Verifica si el cuerpo está en formato JSON o ya es un objeto
+        let body = event.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
+
         const { user_id, cinema_id, title, genre, duration, rating } = body;
 
-        // Validar campos obligatorios
-        const requiredFields = ['user_id', 'title', 'cinema_id'];
+        // Validar entrada
+        const requiredFields = ['user_id', 'cinema_id', 'title', 'genre', 'duration', 'rating'];
         for (let field of requiredFields) {
             if (!body[field]) {
                 return {
@@ -18,11 +23,13 @@ exports.handler = async (event) => {
         }
 
         // Verificar permisos del usuario
-        const t_usuarios = process.env.TABLE_NAME_USUARIOS;
         const userResponse = await dynamodb
             .get({
-                TableName: t_usuarios,
-                Key: { cinema_id, user_id },  // La clave primaria de la tabla usuarios es cinema_id + user_id
+                TableName: process.env.TABLE_NAME_USUARIOS,
+                Key: { 
+                    cinema_id,
+                    user_id
+                },
             })
             .promise();
 
@@ -33,34 +40,25 @@ exports.handler = async (event) => {
             };
         }
 
-        // Verificar que el cinema_id del usuario coincida con el cinema_id del cuerpo de la solicitud
-        if (userResponse.Item.cinema_id !== cinema_id) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ error: 'El usuario no tiene acceso a este cine' }),
-            };
-        }
-
-        // Consultar si la película ya existe en la tabla de Películas (con el cinema_id y el title)
-        const t_peliculas = process.env.TABLE_NAME_PELICULAS;
-        const movieResponse = await dynamodb
+        // Verificar si la película ya existe
+        const existingMovie = await dynamodb
             .get({
-                TableName: t_peliculas,
-                Key: { cinema_id, title },  // La clave primaria de la tabla películas es cinema_id + title
+                TableName: process.env.TABLE_NAME_PELICULAS,
+                Key: { cinema_id, title },
             })
             .promise();
 
-        if (movieResponse.Item) {
+        if (existingMovie.Item) {
             return {
                 statusCode: 409,
                 body: JSON.stringify({ error: 'La película ya existe' }),
             };
         }
 
-        // Agregar la nueva película a la tabla Películas
+        // Agregar la nueva película
         await dynamodb
             .put({
-                TableName: t_peliculas,
+                TableName: process.env.TABLE_NAME_PELICULAS,
                 Item: {
                     cinema_id,
                     title,
@@ -71,17 +69,19 @@ exports.handler = async (event) => {
             })
             .promise();
 
-        // Responder con éxito
         return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Película agregada exitosamente' }),
+            statusCode: 201,
+            body: JSON.stringify({ message: 'Película agregada correctamente' }),
         };
 
     } catch (error) {
-        console.error("Error:", error);
+        console.error('Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error interno del servidor', details: error.message }),
+            body: JSON.stringify({
+                error: 'Error interno del servidor',
+                details: error.message,
+            }),
         };
     }
 };

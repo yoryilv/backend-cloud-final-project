@@ -1,44 +1,65 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-exports.handler = async (event) => {
+exports.lambda_handler = async (event) => {
     try {
-        const body = JSON.parse(event.body); // Parsear el body de la solicitud
-        const { user_id, title, cinema_id } = body;
+        // Verifica si el cuerpo está en formato JSON o ya es un objeto
+        let body = event.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
 
+        const { user_id, cinema_id, title } = body;
+
+        // Validar entrada
         const requiredFields = ['user_id', 'cinema_id', 'title'];
         for (let field of requiredFields) {
             if (!body[field]) {
                 return {
-                statusCode: 400,
-                body: JSON.stringify({ error: `Falta el campo obligatorio: ${field}` }),
+                    statusCode: 400,
+                    body: JSON.stringify({ error: `Falta el campo obligatorio: ${field}` }),
                 };
             }
         }
 
         // Verificar permisos del usuario
-        const t_usuarios = process.env.TABLE_NAME_USUARIOS;
         const userResponse = await dynamodb
             .get({
-                TableName: t_usuarios,
-                Key: { user_id },
+                TableName: process.env.TABLE_NAME_USUARIOS,
+                Key: { 
+                    cinema_id,
+                    user_id
+                },
             })
             .promise();
 
-        // Verificar permisos del usuario y si el cinema_id del usuario coincide con el cinema_id del cuerpo de la solicitud
-        if (!userResponse.Item || userResponse.Item.role !== 'admin' || userResponse.Item.cinema_id !== cinema_id) {
+        if (!userResponse.Item || userResponse.Item.role !== 'admin') {
             return {
                 statusCode: 403,
-                body: JSON.stringify({ error: 'Permiso denegado o el usuario no tiene acceso a este cine' }),
+                body: JSON.stringify({ error: 'Permiso denegado: el usuario no tiene acceso como admin' }),
             };
         }
 
-        // Eliminar la película (utilizando cinema_id y title como claves)
-        const t_peliculas = process.env.TABLE_NAME_PELICULAS;
+        // Verificar que existe la película
+        const existingMovie = await dynamodb
+            .get({
+                TableName: process.env.TABLE_NAME_PELICULAS,
+                Key: { cinema_id, title },
+            })
+            .promise();
+
+        if (!existingMovie.Item) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: 'La película no existe' }),
+            };
+        }
+
+        // Eliminar la película
         await dynamodb
             .delete({
-                TableName: t_peliculas,
-                Key: { cinema_id, title },  // Usamos ambas claves
+                TableName: process.env.TABLE_NAME_PELICULAS,
+                Key: { cinema_id, title },
             })
             .promise();
 
@@ -50,7 +71,10 @@ exports.handler = async (event) => {
         console.error('Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error interno del servidor', details: error.message }),
+            body: JSON.stringify({
+                error: 'Error interno del servidor',
+                details: error.message,
+            }),
         };
     }
 };

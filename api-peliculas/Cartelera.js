@@ -1,27 +1,31 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-exports.handler = async (event) => {
+exports.lambda_handler = async (event) => {
     try {
-        // Obtener el cinema_id desde la solicitud
-        const cinema_id = event.pathParameters.cinema_id;
+        // Verifica si el cuerpo está en formato JSON o ya es un objeto
+        let body = event.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
+
+        const { cinema_id } = body;
+
+        // Validar entrada
         if (!cinema_id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Missing cinema_id in the request' })
+                body: JSON.stringify({ error: 'Falta el campo obligatorio: cinema_id' }),
             };
         }
 
-        const tableName = `t_peliculas`;
-
         // Consultar todas las películas para el cinema_id
         const params = {
-            TableName: tableName,
+            TableName: process.env.TABLE_NAME_PELICULAS,
             KeyConditionExpression: 'cinema_id = :cinema_id',
             ExpressionAttributeValues: {
                 ':cinema_id': cinema_id
-            },
-            ExclusiveStartKey: event.queryStringParameters?.lastEvaluatedKey || null,  // Paginación
+            }
         };
 
         const response = await dynamodb.query(params).promise();
@@ -43,20 +47,19 @@ exports.handler = async (event) => {
             rating: movie.rating
         }));
 
-        // Responder con la lista de películas
         return {
             statusCode: 200,
             body: JSON.stringify(moviesList)
         };
 
     } catch (error) {
-        console.error("Exception:", error);
+        console.error('Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: 'Internal server error',
-                details: error.message
-            })
+                error: 'Error interno del servidor',
+                details: error.message,
+            }),
         };
     }
 };
