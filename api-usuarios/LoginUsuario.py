@@ -1,22 +1,18 @@
 import boto3
 import hashlib
+import uuid
+from datetime import datetime, timedelta
 import json
 
-# Hashear contraseña
 def hash_password(password):
-    # Retorna la contraseña hasheada
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
     try:
-        # Imprimir el evento completo para depuración
-        print("Evento recibido:", json.dumps(event))
-        
         # Manejar diferentes formatos de entrada
         if isinstance(event, str):
             event = json.loads(event)
         
-        # Si event es un diccionario con 'body'
         if 'body' in event:
             try:
                 body = json.loads(event['body'])
@@ -25,96 +21,88 @@ def lambda_handler(event, context):
         else:
             body = event
 
-        # Obtener los valores
+        # Obtener credenciales
         cinema_id = body.get('cinema_id')
         user_id = body.get('user_id')
         password = body.get('password')
 
-        # Imprimir para depuración
-        print(f"Valores extraídos:")
-        print(f"cinema_id: {cinema_id}")
-        print(f"user_id: {user_id}")
-        print(f"password: {password}")
-        # Validar que cinema_id, user_id y password estén presentes
-        if not cinema_id or not user_id or not password:
+        # Validar datos necesarios
+        if not user_id or not password or not cinema_id:
             return {
                 'statusCode': 400,
                 'body': json.dumps({
-                    'error': 'Missing cinema_id, user_id, or password',
-                    'received': {
-                        'cinema_id': cinema_id,
-                        'user_id': user_id,
-                        'password': bool(password)
-                    }
+                    'error': 'Missing required fields (user_id, password, cinema_id)'
                 })
             }
 
-        # Hashear la contraseña antes de almacenarla
+        # Hashear password
         hashed_password = hash_password(password)
 
-        # Conectar con DynamoDB
+        # Conectar a DynamoDB
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('t_usuarios')
+        users_table = dynamodb.Table('t_usuarios')
 
-        # Verificar si el usuario ya existe en la tabla de usuarios
-        try:
-            response = table.get_item(
-                Key={
-                    'cinema_id': cinema_id,  # partition key
-                    'user_id': user_id       # sort key
-                }
-            )
+        # Buscar usuario
+        response = users_table.get_item(
+            Key={
+                'cinema_id': cinema_id,
+                'user_id': user_id
+            }
+        )
 
-            if 'Item' in response:
-                return {
-                    'statusCode': 409,
-                    'body': json.dumps({
-                        'error': 'User already exists',
-                        'user_id': user_id,
-                        'cinema_id': cinema_id
-                    })
-                }
-
-        except Exception as check_error:
-            print(f"Error checking existing user: {check_error}")
-            # Si hay un error al verificar, continuamos con el registro
-
-        # Almacenar los datos del usuario en la tabla de DynamoDB
-        try:
-            table.put_item(
-                Item={
-                    'cinema_id': str(cinema_id),
-                    'user_id': str(user_id),
-                    'password': hashed_password
-                }
-            )
-        except Exception as put_error:
-            print(f"Error storing user: {put_error}")
+        # Verificar si existe el usuario
+        if 'Item' not in response:
             return {
-                'statusCode': 500,
+                'statusCode': 403,
                 'body': json.dumps({
-                    'error': 'Error storing user data',
-                    'details': str(put_error)
+                    'error': 'Usuario no existe'
                 })
             }
 
-        # Retornar un mensaje de éxito
+        # Verificar password
+        stored_password = response['Item']['password']
+        if hashed_password != stored_password:
+            return {
+                'statusCode': 403,
+                'body': json.dumps({
+                    'error': 'Password incorrecto'
+                })
+            }
+
+        # Generar token y fecha de expiración
+        token = str(uuid.uuid4())
+        expiration_date = datetime.now() + timedelta(minutes=60)
+
+        # Crear registro de token
+        token_record = {
+            'token': token,
+            'cinema_id': cinema_id,
+            'user_id': user_id,
+            'role': response['Item'].get('role', 'client'),
+            'expires': expiration_date.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        # Guardar token en DynamoDB
+        tokens_table = dynamodb.Table('t_tokens_acceso')
+        tokens_table.put_item(Item=token_record)
+
+        # Respuesta exitosa
         return {
             'statusCode': 200,
             'body': json.dumps({
-                'message': 'User registered successfully', 
+                'token': token,
+                'expires': expiration_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'user_id': user_id,
-                'cinema_id': cinema_id
+                'role': response['Item'].get('role', 'client')
             })
         }
 
     except Exception as e:
-        # Manejo de excepciones generales
-        print("General Exception:", str(e))
+        print("Error:", str(e))
         return {
             'statusCode': 500,
             'body': json.dumps({
-                'error': 'Internal server error', 
+                'error': 'Error interno del servidor',
                 'details': str(e)
             })
         }
