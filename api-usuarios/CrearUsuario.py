@@ -18,8 +18,6 @@ def lambda_handler(event, context):
         
         # Verificar que el email y el password existen
         if user_id and password:
-            
-            # Verificar que el rol sea válido
             valid_roles = ['client', 'admin']
             if role not in valid_roles:
                 return {
@@ -29,22 +27,13 @@ def lambda_handler(event, context):
             
             # Hashea la contraseña antes de almacenarla
             hashed_password = hash_password(password)
-            
             # Conectar DynamoDB
             dynamodb = boto3.resource('dynamodb')
             t_usuarios = dynamodb.Table('t_usuarios')
-            
-            # Verificar si el usuario ya existe
-            existing_user = t_usuarios.get_item(Key={'user_id': user_id})
-            if 'Item' in existing_user:
-                return {
-                'statusCode': 409,
-                'body': json.dumps({'error': 'User already exists'})
-                }
-            
             # Almacena los datos del user en la tabla de usuarios en DynamoDB
             t_usuarios.put_item(
                 Item={
+                    'cinema_id': cinema_id,
                     'user_id': user_id,
                     'password': hashed_password,
                     'role': role
