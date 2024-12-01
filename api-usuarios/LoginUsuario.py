@@ -1,90 +1,86 @@
 import boto3
 import hashlib
-import uuid
-from datetime import datetime, timedelta
-from boto3.dynamodb.conditions import Key
 import json
 
 def hash_password(password):
+    # Hashear la contraseña con SHA256 (en producción sería mejor usar algo más robusto como bcrypt)
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
     try:
-        # Manejo de diferentes formatos de entrada
-        if isinstance(event.get('body'), str):
-            body = json.loads(event['body'])
+        # Manejar diferentes formatos de entrada
+        if isinstance(event, str):
+            event = json.loads(event)
+
+        # Si el evento tiene un body, tratar de decodificarlo
+        if 'body' in event:
+            try:
+                body = json.loads(event['body'])
+            except (json.JSONDecodeError, TypeError):
+                body = event['body'] if isinstance(event['body'], dict) else event
         else:
             body = event
 
-        # Entrada (json) con manejo seguro
+        # Obtener los valores necesarios para el login
+        cinema_id = body.get('cinema_id')
         user_id = body.get('user_id')
         password = body.get('password')
 
-        if not user_id or not password:
+        # Verificación de valores
+        if not all([cinema_id, user_id, password]):
             return {
                 'statusCode': 400,
-                'body': 'Faltan campos requeridos (user_id, password)'
+                'body': json.dumps({
+                    'error': 'Faltan cinema_id, user_id o password en la solicitud.'
+                })
             }
-        
-        hashed_password = hash_password(password)
-        
-        # Proceso
+
+        # Conectar a DynamoDB
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('t_usuarios')
-        
-        # Primero buscar el cinema_id usando scan
-        response_scan = table.scan(
-            FilterExpression=Key('user_id').eq(user_id)
-        )
-        
-        if not response_scan['Items']:
-            return {
-                'statusCode': 403,
-                'body': 'Usuario no existe'
-            }
-        
-        # Obtener el cinema_id del resultado
-        cinema_id = response_scan['Items'][0]['cinema_id']
-        
-        # Ahora hacer get_item con la clave compuesta completa
+
+        # Verificar si el usuario existe en la base de datos
         response = table.get_item(
             Key={
-                'cinema_id': cinema_id,
-                'user_id': user_id
+                'cinema_id': cinema_id,  # Clave de partición
+                'user_id': user_id       # Clave de ordenación
             }
         )
-        
+
         if 'Item' not in response:
             return {
-                'statusCode': 403,
-                'body': 'Usuario no existe'
+                'statusCode': 404,
+                'body': json.dumps({
+                    'error': 'Usuario no encontrado'
+                })
             }
-            
-        hashed_password_bd = response['Item']['password']
-        if hashed_password == hashed_password_bd:
-            # Genera token
-            token = str(uuid.uuid4())
-            fecha_hora_exp = datetime.now() + timedelta(minutes=60)
-            registro = {
-                'token': token,
-                'expires': fecha_hora_exp.strftime('%Y-%m-%d %H:%M:%S')
-            }
-            table = dynamodb.Table('t_tokens_acceso')
-            dynamodbResponse = table.put_item(Item = registro)
-            
+
+        # Recuperar la contraseña almacenada (hasheada)
+        stored_password = response['Item'].get('password')
+
+        # Verificar si la contraseña proporcionada coincide con la almacenada
+        if stored_password != hash_password(password):
             return {
-                'statusCode': 200,
-                'token': token
+                'statusCode': 401,
+                'body': json.dumps({
+                    'error': 'Contraseña incorrecta'
+                })
             }
-        else:
-            return {
-                'statusCode': 403,
-                'body': 'Password incorrecto'
-            }
-            
+
+        # Respuesta exitosa
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Login exitoso',
+                'role': response['Item'].get('role')
+            })
+        }
+
     except Exception as e:
-        print(f"Error: {str(e)}")
+        # Manejo de errores
         return {
             'statusCode': 500,
-            'body': json.dumps(str(e))
+            'body': json.dumps({
+                'error': f'Ocurrió un error: {str(e)}'
+            })
         }
