@@ -17,6 +17,7 @@ provider:
     TABLE_NAME_PROYECCIONES: t_proyecciones
     TABLE_NAME_VISITAS: t_visitas
     TABLE_NAME_TOKEN_ACCESO: t_token_acceso
+    TABLE_NAME_RESERVAS: t_reservas
 
 resources:
   Resources:
@@ -160,7 +161,7 @@ resources:
             AttributeType: "S"
         KeySchema:
           - AttributeName: "reservation_id"
-              KeyType: "HASH"  # Partition key
+            KeyType: "HASH"  # Partition key
         GlobalSecondaryIndexes:
           - IndexName: "UserReservationsIndex"
             KeySchema:
