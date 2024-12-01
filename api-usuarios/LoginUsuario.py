@@ -3,15 +3,28 @@ import hashlib
 import uuid
 from datetime import datetime, timedelta
 from boto3.dynamodb.conditions import Key
+import json
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
     try:
-        # Entrada (json)
-        user_id = event['user_id']
-        password = event['password']
+        # Manejo de diferentes formatos de entrada
+        if isinstance(event.get('body'), str):
+            body = json.loads(event['body'])
+        else:
+            body = event
+
+        # Entrada (json) con manejo seguro
+        user_id = body.get('user_id')
+        password = body.get('password')
+
+        if not user_id or not password:
+            return {
+                'statusCode': 400,
+                'body': 'Faltan campos requeridos (user_id, password)'
+            }
         
         hashed_password = hash_password(password)
         
@@ -73,5 +86,5 @@ def lambda_handler(event, context):
         print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
-            'body': str(e)
+            'body': json.dumps(str(e))
         }
