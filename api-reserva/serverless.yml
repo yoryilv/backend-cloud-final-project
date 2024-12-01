@@ -15,6 +15,7 @@ provider:
     TABLE_NAME_CARTELERA: t_cartelera
     TABLE_NAME_PELICULAS: t_peliculas
     TABLE_NAME_PROYECCIONES: t_proyecciones
+    TABLE_NAME_RESERVAS: t_reservas
 
 functions:
   # api-reserva (Node.js)

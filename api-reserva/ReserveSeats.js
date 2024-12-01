@@ -1,41 +1,65 @@
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
 module.exports.reservarAsientos = async (event) => {
     try {
         const { 
-            cinema_id, 
-            cinema_name, 
-            show_id, 
+            user_id,
+            cinema_name,
+            show_id,
             seats_reserved
         } = JSON.parse(event.body);
 
-        if (!cinema_id || !cinema_name || !show_id || !seats_reserved) {
+        if (!user_id || !cinema_name || !show_id || !seats_reserved) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Missing required fields' })
             };
         }
 
-        const getParams = {
-            TableName: `t_proyecciones`,
-            Key: { 
-                cinema_id: cinema_id,
-                cinema_name: cinema_name,
-                show_id: show_id,
+        const cinemaParams = {
+            TableName: process.env.TABLE_NAME_CINES,
+            FilterExpression: 'cinema_name = :cinema_name',
+            ExpressionAttributeValues: {
+                ':cinema_name': cinema_name
             }
         };
 
-        const existingShow = await dynamoDB.get(getParams).promise();
+        const cinemaResult = await dynamoDB.scan(cinemaParams).promise();
+        
+        if (!cinemaResult.Items || cinemaResult.Items.length === 0) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: 'Cinema not found' })
+            };
+        }
 
-        if (!existingShow.Item) {
+        const cinema_id = cinemaResult.Items[0].cinema_id;
+
+        // Verificar disponibilidad en la proyección usando el ShowIdIndex
+        const showParams = {
+            TableName: process.env.TABLE_NAME_PROYECCIONES,
+            IndexName: 'ShowIdIndex',
+            KeyConditionExpression: 'cinema_id = :cinema_id AND show_id = :show_id',
+            ExpressionAttributeValues: {
+                ':cinema_id': cinema_id,
+                ':show_id': show_id
+            }
+        };
+
+        const showResult = await dynamoDB.query(showParams).promise();
+
+        if (!showResult.Items || showResult.Items.length === 0) {
             return {
                 statusCode: 404,
                 body: JSON.stringify({ error: 'Show not found' })
             };
         }
 
-        const currentSeatsAvailable = existingShow.Item.seats_available || 0;
+        const existingShow = showResult.Items[0];
+        const currentSeatsAvailable = existingShow.seats_available || 0;
+
         if (currentSeatsAvailable < seats_reserved) {
             return {
                 statusCode: 400,
@@ -46,12 +70,37 @@ module.exports.reservarAsientos = async (event) => {
             };
         }
 
+        // Crear reservación
+        const reservation_id = uuidv4();
+        const reservationParams = {
+            TableName: process.env.TABLE_NAME_RESERVAS,
+            Item: {
+                reservation_id,
+                user_id,
+                cinema_id,
+                cinema_name,
+                show_id,
+                seats_reserved,
+                reservation_date: new Date().toISOString(),
+                status: 'CONFIRMED',
+                show_details: {
+                    title: existingShow.title,
+                    hall: existingShow.hall,
+                    date: existingShow.date,
+                    start_time: existingShow.start_time,
+                    end_time: existingShow.end_time
+                }
+            }
+        };
+
+        await dynamoDB.put(reservationParams).promise();
+
+        // Actualizar asientos disponibles
         const updateParams = {
-            TableName: `t_proyecciones`,
+            TableName: process.env.TABLE_NAME_PROYECCIONES,
             Key: { 
-                cinema_id: cinema_id, 
-                cinema_name: cinema_name,
-                show_id: show_id 
+                cinema_id,
+                cinema_name
             },
             UpdateExpression: 'SET seats_available = seats_available - :seats_reserved',
             ConditionExpression: 'seats_available >= :seats_reserved',
@@ -64,16 +113,26 @@ module.exports.reservarAsientos = async (event) => {
         const updatedShow = await dynamoDB.update(updateParams).promise();
 
         const responseBody = {
-            cinema_id: existingShow.Item.cinema_id,
-            cinema_name: existingShow.Item.cinema_name,
-            show_id: existingShow.Item.show_id,
-            title: existingShow.Item.title,
-            hall: existingShow.Item.hall,
-            date: existingShow.Item.date,
-            seats_reserved: seats_reserved,
-            seats_available: updatedShow.Attributes.seats_available,
-            start_time: existingShow.Item.start_time,
-            end_time: existingShow.Item.end_time
+            reservation_id,
+            user_id,
+            cinema_details: {
+                cinema_id,
+                cinema_name
+            },
+            show_details: {
+                show_id,
+                title: existingShow.title,
+                hall: existingShow.hall,
+                date: existingShow.date,
+                start_time: existingShow.start_time,
+                end_time: existingShow.end_time
+            },
+            reservation_details: {
+                seats_reserved,
+                reservation_date: reservationParams.Item.reservation_date,
+                status: 'CONFIRMED'
+            },
+            seats_available: updatedShow.Attributes.seats_available
         };
 
         return {
@@ -83,7 +142,6 @@ module.exports.reservarAsientos = async (event) => {
 
     } catch (error) {
         console.error('Reservation error:', error);
-
         return {
             statusCode: 500,
             body: JSON.stringify({ 

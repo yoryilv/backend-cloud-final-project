@@ -147,3 +147,25 @@ resources:
           - AttributeName: "token_id"
             KeyType: "HASH"  # Partition key
         BillingMode: PAY_PER_REQUEST
+    
+      # Tabla de Reservas
+    ReservasTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME_RESERVAS}
+        AttributeDefinitions:
+          - AttributeName: "reservation_id"
+            AttributeType: "S"
+          - AttributeName: "user_id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "reservation_id"
+              KeyType: "HASH"  # Partition key
+        GlobalSecondaryIndexes:
+          - IndexName: "UserReservationsIndex"
+            KeySchema:
+              - AttributeName: "user_id"
+                KeyType: "HASH"
+            Projection:
+              ProjectionType: "ALL"
+        BillingMode: PAY_PER_REQUEST
