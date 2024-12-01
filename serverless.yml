@@ -117,7 +117,6 @@ resources:
                 KeyType: "RANGE"
             Projection:
               ProjectionType: "ALL"
-            BIllingMode: PAY_PER_REQUEST
 
     # Tabla de Visitas
     VisitasTable:
